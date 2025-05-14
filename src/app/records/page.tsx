@@ -439,7 +439,7 @@ export default function RecordList() {
       {/* メインコンテンツ */}
       <main className="flex-1">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-gray-900">テイスティング記録一覧</h1>
+          <h1 className="text-3xl font-bold text-gray-900">記録一覧</h1>
           <div className="flex gap-2 items-center bg-white border border-gray-300 rounded px-3 py-2">
             <label className="text-sm text-gray-700">並べ替え:</label>
             <select
@@ -458,12 +458,6 @@ export default function RecordList() {
               <option value="asc">昇順</option>
               <option value="desc">降順</option>
             </select>
-            <Link
-              href="/new"
-              className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-            >
-              新規記録
-            </Link>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">

@@ -192,7 +192,10 @@ export default function NewRecord() {
     setWeatherError(null);
     try {
       const res = await fetch('/api/weather');
-      if (!res.ok) throw new Error('天気情報の取得に失敗しました');
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error('天気情報の取得に失敗しました: ' + errText);
+      }
       const data = await res.json();
       setFormData({
         ...formData,
@@ -264,7 +267,17 @@ export default function NewRecord() {
                 </ActionButton>
               </div>
               {weatherError && (
-                <div className="text-red-500 text-xs mt-1">{weatherError}</div>
+                <div className="text-red-500 text-xs mt-1">
+                  {weatherError}
+                  <button
+                    type="button"
+                    className="ml-2 underline text-blue-600"
+                    onClick={fetchWeather}
+                  >
+                    再試行
+                  </button>
+                  <div className="mt-1 text-gray-500">APIキーやネットワーク設定をご確認ください。</div>
+                </div>
               )}
             </div>
             <div>
@@ -291,7 +304,17 @@ export default function NewRecord() {
                 </ActionButton>
               </div>
               {weatherError && (
-                <div className="text-red-500 text-xs mt-1">{weatherError}</div>
+                <div className="text-red-500 text-xs mt-1">
+                  {weatherError}
+                  <button
+                    type="button"
+                    className="ml-2 underline text-blue-600"
+                    onClick={fetchWeather}
+                  >
+                    再試行
+                  </button>
+                  <div className="mt-1 text-gray-500">APIキーやネットワーク設定をご確認ください。</div>
+                </div>
               )}
             </div>
             <div>
