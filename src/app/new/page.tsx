@@ -411,10 +411,10 @@ export default function NewRecord() {
               />
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  精製方式
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                精製方式
+              </label>
                 <div className="grid grid-cols-2 gap-2">
                   {['ウォッシュド', 'ナチュラル', 'ハニー', 'その他'].map((method) => (
                     <label key={method} className="flex items-center space-x-2">
@@ -429,7 +429,7 @@ export default function NewRecord() {
                       <span className="text-sm text-gray-700">{method}</span>
                     </label>
                   ))}
-                </div>
+            </div>
                 {formData.coffee.process === 'その他' && (
                   <input
                     type="text"
@@ -441,10 +441,10 @@ export default function NewRecord() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  品種
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                品種
+              </label>
                 <div className="grid grid-cols-2 gap-2">
                   {['ティピカ', 'ブルボン', 'カトゥアイ', 'その他'].map((variety) => (
                     <label key={variety} className="flex items-center space-x-2">
@@ -602,74 +602,74 @@ export default function NewRecord() {
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  コーヒー量 (ml)
-                </label>
-                <input
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                  コーヒー豆 (g)
+              </label>
+              <input
                   type="number"
-                  value={formData.brewing.coffeeAmount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      brewing: {
-                        ...formData.brewing,
-                        coffeeAmount: e.target.value,
-                      },
-                    })
-                  }
+                value={formData.brewing.coffeeAmount}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
+                      coffeeAmount: e.target.value,
+                    },
+                  })
+                }
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                   placeholder="例: 20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  湯量 (g)
-                </label>
-                <input
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                  湯量 (ml)
+              </label>
+              <input
                   type="number"
-                  value={formData.brewing.waterAmount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      brewing: {
-                        ...formData.brewing,
-                        waterAmount: e.target.value,
-                      },
-                    })
-                  }
+                value={formData.brewing.waterAmount}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
+                      waterAmount: e.target.value,
+                    },
+                  })
+                }
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                   placeholder="例: 300"
-                />
-              </div>
+              />
+            </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                   蒸らし量 (ml)
-                </label>
-                <input
+              </label>
+              <input
                   type="number"
                   value={formData.brewing.bloomAmount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      brewing: {
-                        ...formData.brewing,
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
                         bloomAmount: e.target.value,
-                      },
-                    })
-                  }
+                    },
+                  })
+                }
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                   placeholder="例: 40"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                   蒸らし時間 (分:秒)
-                </label>
+              </label>
                 <div className="flex space-x-2">
-                  <input
+              <input
                     type="number"
                     min="0"
                     max="59"
@@ -677,12 +677,12 @@ export default function NewRecord() {
                     onChange={(e) => {
                       const minutes = parseInt(e.target.value) || 0;
                       const seconds = parseInt(formData.brewing.bloomTime || '0') % 60;
-                      setFormData({
-                        ...formData,
-                        brewing: {
-                          ...formData.brewing,
+                  setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
                           bloomTime: String(minutes * 60 + seconds),
-                        },
+                    },
                       });
                     }}
                     className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
@@ -706,7 +706,7 @@ export default function NewRecord() {
                     }}
                     className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                     placeholder="秒"
-                  />
+              />
                 </div>
               </div>
             </div>
@@ -715,7 +715,7 @@ export default function NewRecord() {
                 抽出時間 (分:秒)
               </label>
               <div className="flex space-x-2">
-                <input
+              <input
                   type="number"
                   min="0"
                   max="59"
@@ -723,10 +723,10 @@ export default function NewRecord() {
                   onChange={(e) => {
                     const minutes = parseInt(e.target.value) || 0;
                     const seconds = parseInt(formData.brewing.brewTime || '0') % 60;
-                    setFormData({
-                      ...formData,
-                      brewing: {
-                        ...formData.brewing,
+                  setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
                         brewTime: String(minutes * 60 + seconds),
                       },
                     });
@@ -747,12 +747,12 @@ export default function NewRecord() {
                       brewing: {
                         ...formData.brewing,
                         brewTime: String(minutes * 60 + seconds),
-                      },
+                    },
                     });
                   }}
                   className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                   placeholder="秒"
-                />
+              />
               </div>
             </div>
             <div>
@@ -1099,19 +1099,19 @@ export default function NewRecord() {
                   className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   style={{ accentColor: '#111' }}
                 />
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.personalScore}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personalScore: Number(e.target.value),
-                    })
-                  }
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.personalScore}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    personalScore: Number(e.target.value),
+                  })
+                }
                   className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
-                />
+              />
                 <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personalScore}</span>
               </div>
             </div>

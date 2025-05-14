@@ -419,7 +419,7 @@ export default function EditRecord() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">コーヒー量</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">コーヒー豆 (g)</label>
               <input
                 type="text"
                 value={formData.brewing.coffeeAmount}
@@ -436,7 +436,7 @@ export default function EditRecord() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">湯量</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">湯量 (ml)</label>
               <input
                 type="text"
                 value={formData.brewing.waterAmount}

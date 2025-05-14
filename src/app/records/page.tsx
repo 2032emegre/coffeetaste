@@ -186,7 +186,7 @@ export default function RecordList() {
               onChange={e => setSearchName(e.target.value)}
               className="w-full border border-gray-400 rounded px-2 py-1 bg-white text-gray-900"
             />
-          </div>
+      </div>
           {TASTING_FIELDS.map(field => (
             <div key={field.key} className="mb-3">
               <label className="block text-xs text-gray-700 mb-1">{field.label}</label>
@@ -203,9 +203,9 @@ export default function RecordList() {
                   <option key={v} value={v}>{v}</option>
                 ))}
               </select>
-            </div>
+              </div>
           ))}
-        </div>
+                </div>
       </aside>
       {/* メインコンテンツ */}
       <main className="flex-1">
@@ -229,8 +229,8 @@ export default function RecordList() {
               <option value="asc">昇順</option>
               <option value="desc">降順</option>
             </select>
-          </div>
-        </div>
+                </div>
+              </div>
         {loading ? (
           <div className="text-center text-gray-500 py-12">読み込み中...</div>
         ) : (
@@ -255,23 +255,23 @@ export default function RecordList() {
                     <div className="font-bold text-gray-700">産地: <span className="font-normal text-gray-900">{record.coffee?.origin}</span></div>
                     <div className="font-bold text-gray-700">精製方式: <span className="font-normal text-gray-900">{record.coffee?.process}</span></div>
                     <div className="font-bold text-gray-700">品種: <span className="font-normal text-gray-900">{record.coffee?.variety}</span></div>
-                  </div>
+                    </div>
                   {/* 抽出レシピ */}
                   <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs leading-relaxed mb-2">
                     <div className="font-bold text-gray-700 mb-2">抽出レシピ</div>
                     <div className="mb-1 font-bold">ドリッパー: <span className="font-normal text-gray-900">{record.brewing?.dripper}</span></div>
                     <div className="mb-1 font-bold">グラインダー: <span className="font-normal text-gray-900">{record.brewing?.grinder}</span></div>
                     <div className="mb-1 font-bold">挽き目: <span className="font-normal text-gray-900">{record.brewing?.grindSize}</span></div>
-                    <div className="mb-1 font-bold">豆量: <span className="font-normal text-gray-900">{record.brewing?.coffeeAmount}</span></div>
-                    <div className="mb-1 font-bold">湯量: <span className="font-normal text-gray-900">{record.brewing?.waterAmount}</span></div>
+                    <div className="mb-1 font-bold">豆量: <span className="font-normal text-gray-900">{record.brewing?.coffeeAmount} g</span></div>
+                    <div className="mb-1 font-bold">湯量: <span className="font-normal text-gray-900">{record.brewing?.waterAmount} ml</span></div>
                     <div className="mb-1 font-bold">抽出時間: <span className="font-normal text-gray-900">{record.brewing?.brewTime}</span></div>
                     <div className="mb-1 font-bold">温度: <span className="font-normal text-gray-900">{record.brewing?.temperature}</span></div>
                     <div className="font-bold">蒸らし: <span className="font-normal text-gray-900">{record.brewing?.bloomAmount} / {record.brewing?.bloomTime}</span></div>
-                  </div>
+                    </div>
                   {/* レーダーチャート */}
                   <div className="flex justify-center items-center my-4">
                     <RadarChart tasting={record.tasting ?? defaultTasting} />
-                  </div>
+                    </div>
                   {/* 香りのノート */}
                   <div className="space-y-2 text-xs mb-2">
                     <div>

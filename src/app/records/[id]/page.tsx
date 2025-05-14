@@ -73,8 +73,8 @@ export default function RecordDetail() {
           <div><span className="block text-sm font-medium text-gray-700 mb-1">グラインダー</span>{record.brewing?.grinder}</div>
           <div><span className="block text-sm font-medium text-gray-700 mb-1">挽き目</span>{record.brewing?.grindSetting}</div>
           <div><span className="block text-sm font-medium text-gray-700 mb-1">温度</span>{record.brewing?.temperature}</div>
-          <div><span className="block text-sm font-medium text-gray-700 mb-1">コーヒー量</span>{record.brewing?.coffeeAmount}</div>
-          <div><span className="block text-sm font-medium text-gray-700 mb-1">湯量</span>{record.brewing?.waterAmount}</div>
+          <div><span className="block text-sm font-medium text-gray-700 mb-1">コーヒー豆 (g)</span>{record.brewing?.coffeeAmount}</div>
+          <div><span className="block text-sm font-medium text-gray-700 mb-1">湯量 (ml)</span>{record.brewing?.waterAmount}</div>
           <div><span className="block text-sm font-medium text-gray-700 mb-1">抽出時間</span>{record.brewing?.brewTime}</div>
           <div><span className="block text-sm font-medium text-gray-700 mb-1">蒸らし時間</span>{record.brewing?.bloomTime}</div>
           <div><span className="block text-sm font-medium text-gray-700 mb-1">蒸らし量</span>{record.brewing?.bloomAmount}</div>
