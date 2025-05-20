@@ -257,6 +257,14 @@ export default function NewRecord() {
     { key: 'shop', label: '店舗来店' },
   ];
 
+  // クレマ・テイスティング評価の状態をuseStateで管理
+  type CremaKey = 'color' | 'thickness' | 'persistence';
+  type TastingKey = 'acidity' | 'bitterness' | 'sweetness' | 'body' | 'clarity' | 'balance' | 'aftertaste';
+  const [cremaScores, setCremaScores] = useState<Record<CremaKey, number>>({ color: 0, thickness: 0, persistence: 0 });
+  const [tastingScores, setTastingScores] = useState<Record<TastingKey, number>>({ acidity: 0, bitterness: 0, sweetness: 0, body: 0, clarity: 0, balance: 0, aftertaste: 0 });
+  // 合計点自動計算
+  const totalScore = Object.values(cremaScores).reduce((a, b) => a + b, 0) + Object.values(tastingScores).reduce((a, b) => a + b, 0);
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
@@ -684,43 +692,180 @@ export default function NewRecord() {
         </form>
       )}
 
-      {/* espresso用フォーム */}
+      {/* espresso用フォーム（詳細版） */}
       {recordType === 'espresso' && (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 環境情報は共通で利用 */}
+          {/* 環境情報 */}
           <EnvironmentInfo
             formData={formData}
             onChange={handleEnvironmentChange}
             mode="new"
           />
-          {/* エスプレッソ評価項目 */}
+          {/* コーヒー情報（履歴参照・オートコンプリート） */}
+          <CoffeeInfo
+            formData={formData}
+            onChange={handleCoffeeChange}
+            mode="new"
+          />
+          {/* 抽出レシピ */}
           <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">エスプレッソ評価</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">抽出レシピ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">クレマ</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">種類</label>
+                <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500">
+                  <option value="">選択してください</option>
+                  <option value="エスプレッソ">エスプレッソ</option>
+                  <option value="アメリカーノ">アメリカーノ</option>
+                  <option value="リストレット">リストレット</option>
+                  <option value="その他">その他</option>
+                </select>
+                {/* その他選択時のみ表示 */}
+                <input type="text" className="w-full mt-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="その他の種類を記入" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ボディ</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">豆（g）</label>
+                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">酸味</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">抽出量（ml）</label>
+                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">苦味</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">温度（℃）</label>
+                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">後味</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+              <div className="md:col-span-2 flex items-center gap-2 mt-2">
+                <input type="checkbox" id="flair" className="mr-2" />
+                <label htmlFor="flair" className="text-sm font-medium text-gray-700">flair</label>
+                {/* flairチェック時のみ表示 */}
+                <input type="text" className="w-full ml-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="flairでの抽出に関するメモ" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
+                <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={3} />
               </div>
             </div>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">コメント</label>
-              <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={4} />
+          </section>
+          {/* LE NEZ/LES AROMA */}
+          <AromaSection
+            type="nose"
+            formData={formData}
+            onChange={handleAromaChange}
+            mode="new"
+          />
+          <AromaSection
+            type="aroma"
+            formData={formData}
+            onChange={handleAromaChange}
+            mode="new"
+          />
+          {/* クレマ評価（5段階丸ボタンUI） */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">クレマ評価</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { key: 'color', label: '色（淡→濃）' },
+                { key: 'thickness', label: '厚み' },
+                { key: 'persistence', label: '持続性' },
+              ].map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(v => (
+                      <button
+                        key={v}
+                        type="button"
+                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-base font-semibold transition-colors ${cremaScores[key as CremaKey] === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                        style={{ aspectRatio: '1 / 1' }}
+                        onClick={() => setCremaScores(s => ({ ...s, [key as CremaKey]: v }))}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          {/* テイスティング評価（5段階丸ボタンUI） */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">テイスティング評価</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { key: 'acidity', label: '酸味' },
+                { key: 'bitterness', label: '苦味' },
+                { key: 'sweetness', label: '甘み' },
+                { key: 'body', label: 'ボディ' },
+                { key: 'clarity', label: 'クリア度' },
+                { key: 'balance', label: 'バランス' },
+                { key: 'aftertaste', label: '余韻' },
+              ].map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(v => (
+                      <button
+                        key={v}
+                        type="button"
+                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-base font-semibold transition-colors ${tastingScores[key as TastingKey] === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                        style={{ aspectRatio: '1 / 1' }}
+                        onClick={() => setTastingScores(s => ({ ...s, [key as TastingKey]: v }))}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          {/* 総合評価 */}
+          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">個人スコア (0-100)</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={formData.personalScore}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        personalScore: Number(e.target.value),
+                      })
+                    }
+                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={{ accentColor: '#111' }}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.personalScore}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        personalScore: Number(e.target.value),
+                      })
+                    }
+                    className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
+                  />
+                  <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personalScore}</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">評価点数（クレマ＋テイスティング合計）</label>
+                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" value={totalScore} readOnly />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">総合評価・コメント</label>
+                <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={4} />
+              </div>
             </div>
           </section>
           <div className="flex justify-end">
