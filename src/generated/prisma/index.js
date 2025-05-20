@@ -159,16 +159,17 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://postgres:mamepluslab@db.nidijhnbkpfkbaddhzhs.supabase.co:5432/postgres"
+        "value": null
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel TastingRecord {\n  id         Int      @id @default(autoincrement())\n  coffeeName String\n  score      Int\n  notes      String?\n  createdAt  DateTime @default(now())\n}\n",
-  "inlineSchemaHash": "68f2b7b61e1ceddf5df9211dfc22a1de3596cf56f370428ec329841901daa08f",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel TastingRecord {\n  id         Int      @id @default(autoincrement())\n  coffeeName String\n  score      Int\n  notes      String?\n  createdAt  DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "42b1a6b807491163823ae91111f73405c1620c583b433831e2003946f1671b4e",
   "copyEngine": true
 }
 

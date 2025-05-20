@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { TastingRecord } from "@/types/tasting";
 import { createClient } from '@supabase/supabase-js';
 import EnvironmentInfo from '@/components/EnvironmentInfo';
+import AromaSection from '@/components/AromaSection';
+import CoffeeInfo from '@/components/CoffeeInfo';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,6 +43,14 @@ export default function RecordDetail() {
     // 詳細表示モードでは変更を無視
   };
 
+  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative', key: string, value: boolean | string) => {
+    // 詳細表示モードでは変更を無視
+  };
+
+  const handleCoffeeChange = (key: keyof TastingRecord['coffee'], value: any) => {
+    // 詳細表示モードでは変更を無視
+  };
+
   if (loading) return <div className="p-8 text-center">読み込み中...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!record) return <div className="p-8 text-center">記録が見つかりません</div>;
@@ -55,18 +65,13 @@ export default function RecordDetail() {
             onChange={handleEnvironmentChange}
             mode="view"
           />
-          {/* コーヒー情報 */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">コーヒー情報</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div><span className="block text-sm font-medium text-gray-700 mb-1">コーヒー名</span>{record.coffee?.name}</div>
-              <div><span className="block text-sm font-medium text-gray-700 mb-1">産地</span>{record.coffee?.origin}</div>
-              <div><span className="block text-sm font-medium text-gray-700 mb-1">精製方式</span>{record.coffee?.process}</div>
-              <div><span className="block text-sm font-medium text-gray-700 mb-1">品種</span>{record.coffee?.variety}</div>
-              <div><span className="block text-sm font-medium text-gray-700 mb-1">焙煎日</span>{record.coffee?.roastDate}</div>
-              <div><span className="block text-sm font-medium text-gray-700 mb-1">その他の情報</span>{record.coffee?.otherInfo}</div>
-            </div>
-          </section>
+
+          <CoffeeInfo
+            formData={record}
+            onChange={handleCoffeeChange}
+            mode="view"
+          />
+
           {/* 抽出レシピ */}
           <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">抽出レシピ</h2>
@@ -98,25 +103,30 @@ export default function RecordDetail() {
             </div>
           </section>
           {/* 香り（LE NEZ） */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">LE NEZ（香り）</h2>
-            <div className="mb-2"><span className="block text-sm font-medium text-gray-700 mb-1">ポジティブノート</span>{Object.entries(record.nose?.positive || {}).filter(([k,v])=>v && k!=="other").map(([k])=>k).join('、')}{record.nose?.positive?.other ? `、その他: ${record.nose.positive.other}` : ''}</div>
-            <div className="mb-2"><span className="block text-sm font-medium text-gray-700 mb-1">ネガティブノート</span>{Object.entries(record.nose?.negative || {}).filter(([k,v])=>v && k!=="other").map(([k])=>k).join('、')}{record.nose?.negative?.other ? `、その他: ${record.nose.negative.other}` : ''}</div>
-            <div><span className="block text-sm font-medium text-gray-700 mb-1">ノート</span>{record.nose?.notes}</div>
-          </section>
+          <AromaSection
+            type="nose"
+            formData={record}
+            onChange={handleAromaChange}
+            mode="view"
+          />
           {/* アロマ（LES ARÔMES） */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">LES ARÔMES（アロマ）</h2>
-            <div className="mb-2"><span className="block text-sm font-medium text-gray-700 mb-1">ポジティブノート</span>{Object.entries(record.aroma?.positive || {}).filter(([k,v])=>v && k!=="other").map(([k])=>k).join('、')}{record.aroma?.positive?.other ? `、その他: ${record.aroma.positive.other}` : ''}</div>
-            <div className="mb-2"><span className="block text-sm font-medium text-gray-700 mb-1">ネガティブノート</span>{Object.entries(record.aroma?.negative || {}).filter(([k,v])=>v && k!=="other").map(([k])=>k).join('、')}{record.aroma?.negative?.other ? `、その他: ${record.aroma.negative.other}` : ''}</div>
-            <div><span className="block text-sm font-medium text-gray-700 mb-1">ノート</span>{record.aroma?.notes}</div>
-          </section>
+          <AromaSection
+            type="aroma"
+            formData={record}
+            onChange={handleAromaChange}
+            mode="view"
+          />
           {/* 総合評価 */}
           <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
-            <div className="mb-2"><span className="block text-sm font-medium text-gray-700 mb-1">個人スコア</span>{record.personalScore} / 100</div>
-            <div className="mb-2"><span className="block text-sm font-medium text-gray-700 mb-1">コメント</span>{record.comments}</div>
-            <div><span className="block text-sm font-medium text-gray-700 mb-1">気付き・改善点・比較</span>{record.notes}</div>
+            <div className="mb-4">
+              <span className="block text-sm font-medium text-gray-700 mb-1">個人スコア</span>
+              <div className="text-lg font-bold text-gray-900">{record.personalScore} / 100</div>
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-gray-700 mb-1">評価・気づき</span>
+              <div className="whitespace-pre-wrap text-gray-900">{record.comments || '記録なし'}</div>
+            </div>
           </section>
         </>
       )}

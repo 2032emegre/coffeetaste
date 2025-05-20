@@ -5,6 +5,8 @@ import { useRouter, useParams } from "next/navigation";
 import { TastingRecord } from "@/types/tasting";
 import { createClient } from '@supabase/supabase-js';
 import EnvironmentInfo from '@/components/EnvironmentInfo';
+import AromaSection from '@/components/AromaSection';
+import CoffeeInfo from '@/components/CoffeeInfo';
 // Firestore連携やAPI取得は後で追加
 
 const supabase = createClient(
@@ -130,12 +132,13 @@ export default function EditRecord() {
       const res = await fetch('/api/weather');
       if (!res.ok) throw new Error('天気情報の取得に失敗しました');
       const data = await res.json();
+      if (!formData) return;
       setFormData({
-        ...formData!,
+        ...formData,
         environment: {
-          ...formData!.environment,
+          ...formData.environment,
           weather: data.weather || '',
-          temperature: data.temperature !== '' ? `${data.temperature}℃` : '',
+          temperature: data.temperature !== '' ? Number(data.temperature) : null,
         },
       });
     } catch (e: any) {
@@ -154,6 +157,23 @@ export default function EditRecord() {
         [key]: value
       }
     }));
+  };
+
+  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative', key: string, value: boolean | string) => {
+    if (!formData) return;
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [type]: {
+          ...prev[type],
+          [field]: {
+            ...prev[type][field],
+            [key]: value,
+          },
+        },
+      } as TastingRecord;
+    });
   };
 
   return (
@@ -494,288 +514,73 @@ export default function EditRecord() {
             </div>
           </section>
 
-          {/* 香り（LE NEZ） */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">LE NEZ（香り）</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ポジティブノート</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {positiveAromas.map((aroma) => (
-                    <label key={aroma.key} className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(formData.nose.positive[aroma.key])}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            nose: {
-                              ...formData.nose,
-                              positive: {
-                                ...formData.nose.positive,
-                                [aroma.key]: e.target.checked,
-                              },
-                            },
-                          } as TastingRecord)
-                        }
-                        className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{aroma.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    placeholder="その他"
-                    value={String(formData.nose.positive.other || '')}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        nose: {
-                          ...formData.nose,
-                          positive: {
-                            ...formData.nose.positive,
-                            other: e.target.value,
-                          },
-                        },
-                      } as TastingRecord)
-                    }
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ネガティブノート</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {negativeAromas.map((aroma) => (
-                    <label key={aroma.key} className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(formData.nose.negative[aroma.key])}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            nose: {
-                              ...formData.nose,
-                              negative: {
-                                ...formData.nose.negative,
-                                [aroma.key]: e.target.checked,
-                              },
-                            },
-                          } as TastingRecord)
-                        }
-                        className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{aroma.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    placeholder="その他"
-                    value={String(formData.nose.negative.other || '')}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        nose: {
-                          ...formData.nose,
-                          negative: {
-                            ...formData.nose.negative,
-                            other: e.target.value,
-                          },
-                        },
-                      } as TastingRecord)
-                    }
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ノート</label>
-                <textarea
-                  value={formData.nose.notes}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      nose: {
-                        ...formData.nose,
-                        notes: e.target.value,
-                      },
-                    } as TastingRecord)
-                  }
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  rows={3}
-                />
-              </div>
-            </div>
-          </section>
+          {/* LE NEZ */}
+          <AromaSection
+            type="nose"
+            formData={formData}
+            onChange={handleAromaChange}
+            mode="edit"
+          />
 
-          {/* アロマ（LES ARÔMES） */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">LES ARÔMES（アロマ）</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ポジティブノート</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {positiveAromas.map((aroma) => (
-                    <label key={aroma.key} className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(formData.aroma.positive[aroma.key])}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            aroma: {
-                              ...formData.aroma,
-                              positive: {
-                                ...formData.aroma.positive,
-                                [aroma.key]: e.target.checked,
-                              },
-                            },
-                          } as TastingRecord)
-                        }
-                        className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{aroma.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    placeholder="その他"
-                    value={String(formData.aroma.positive.other || '')}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        aroma: {
-                          ...formData.aroma,
-                          positive: {
-                            ...formData.aroma.positive,
-                            other: e.target.value,
-                          },
-                        },
-                      } as TastingRecord)
-                    }
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ネガティブノート</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {negativeAromas.map((aroma) => (
-                    <label key={aroma.key} className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(formData.aroma.negative[aroma.key])}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            aroma: {
-                              ...formData.aroma,
-                              negative: {
-                                ...formData.aroma.negative,
-                                [aroma.key]: e.target.checked,
-                              },
-                            },
-                          } as TastingRecord)
-                        }
-                        className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{aroma.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    placeholder="その他"
-                    value={String(formData.aroma.negative.other || '')}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        aroma: {
-                          ...formData.aroma,
-                          negative: {
-                            ...formData.aroma.negative,
-                            other: e.target.value,
-                          },
-                        },
-                      } as TastingRecord)
-                    }
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ノート</label>
-                <textarea
-                  value={formData.aroma.notes}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      aroma: {
-                        ...formData.aroma,
-                        notes: e.target.value,
-                      },
-                    } as TastingRecord)
-                  }
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  rows={3}
-                />
-              </div>
-            </div>
-          </section>
+          {/* LES ARÔMES */}
+          <AromaSection
+            type="aroma"
+            formData={formData}
+            onChange={handleAromaChange}
+            mode="edit"
+          />
 
           {/* 総合評価 */}
           <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">個人スコア</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.personalScore}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      personalScore: parseInt(e.target.value) || 0,
-                    } as TastingRecord)
-                  }
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">個人スコア (0-100)</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={formData.personalScore}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        personalScore: Number(e.target.value),
+                      })
+                    }
+                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={{ accentColor: '#111' }}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.personalScore}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        personalScore: Number(e.target.value),
+                      })
+                    }
+                    className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
+                  />
+                  <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personalScore}</span>
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">コメント</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">評価・気づき</label>
                 <textarea
                   value={formData.comments}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
                       comments: e.target.value,
-                    } as TastingRecord)
+                    })
                   }
+                  placeholder="コメントや気づき、改善点などを記入してください"
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">気付き・改善点・比較</label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      notes: e.target.value,
-                    } as TastingRecord)
-                  }
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  rows={3}
+                  rows={6}
                 />
               </div>
             </div>

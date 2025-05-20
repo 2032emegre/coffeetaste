@@ -57,4 +57,5 @@ export interface TastingRecord {
     personalScore: number;  // 100点満点
     comments: string;
     notes: string;
+    created_at?: string;
 } 
