@@ -3,10 +3,10 @@ export interface TastingRecord {
     timestamp?: Date;
     environment: {
         date: string;
+        time: string;  // HH:mm形式の時刻
         weather: string;
-        temperature: string;
+        temperature: number | null;  // 数値型に変更
         humidity?: string;
-        timeOfDay: string;
         isAutoFetched: boolean;
     };
     coffee: {

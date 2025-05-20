@@ -1,0 +1,112 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+{
+  // ─────────────────────────────────────────────
+  // Cursor ProjectRule for coffeetaste (v1.0 予定)
+  // ─────────────────────────────────────────────
+  "$schema": "https://cursor.sh/schemas/project-rules.json",
+
+  "metadata": {
+    "name": "CoffeeTaste WebApp",
+    "description": "Next.js 14 + TypeScript + Tailwind + Supabase テイスティング記録アプリ",
+    "owner": "mizoguchiyuusuke",
+    "defaultBranch": "main"
+  },
+
+  /* ========== 1. Directory & Layering ========== */
+  "structure": {
+    "preferredFolders": [
+      { "match": "^src/app/.*",           "layer": "pages" },
+      { "match": "^src/components/.*",    "layer": "ui" },
+      { "match": "^src/features/.*",      "layer": "features" },
+      { "match": "^src/lib/.*",           "layer": "lib" },
+      { "match": "^src/hooks/.*",         "layer": "hooks" },
+      { "match": "^src/tests/.*",         "layer": "tests" }
+    ],
+    "rules": [
+      { "fromLayer": "features", "toLayer": ["ui", "lib"], "allow": true },
+      { "fromLayer": "ui",       "toLayer": ["lib"],       "allow": true },
+      { "fromLayer": ["pages"],  "toLayer": "*",           "allow": true }
+    ]
+  },
+
+  /* ========== 2. Tech Stack Presets ========== */
+  "generativePreferences": {
+    "language": "TypeScript",
+    "framework": "Next.js@14",
+    "css": "Tailwind",
+    "db": "Supabase",
+    "testing": {
+      "unit": "Vitest",
+      "e2e": "Playwright"
+    },
+    "charts": "ECharts",
+    "formLib": "react-hook-form",
+    "state": "SWR"
+  },
+
+  /* ========== 3. Code Style ========== */
+  "style": {
+    "eslintConfig": {
+      "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"]
+    },
+    "tailwind": {
+      "preferredClassOrder": "tailwindcss-classes",
+      "enableDarkMode": false
+    },
+    "typescript": {
+      "strict": true,
+      "noImplicitAny": true
+    },
+    "react": {
+      "componentStyle": "function",
+      "serverComponentsDefault": true
+    }
+  },
+
+  /* ========== 4. Commit Convention ========== */
+  "git": {
+    "commitMessageTemplate": "{type}: {scope} {emoji} {subject}",
+    "types": ["feat", "fix", "chore", "docs", "refactor", "test"],
+    "scopes": ["record", "roast", "note", "ui", "api", "db", "build"],
+    "emojis": {
+      "feat": "✨",
+      "fix": "🐞",
+      "chore": "🔧",
+      "docs": "📝",
+      "refactor": "♻️",
+      "test": "✅"
+    }
+  },
+
+  /* ========== 5. Environment Variables ========== */
+  "env": {
+    "required": [
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "OPENWEATHER_API_KEY"
+    ],
+    "security": "neverCommit"
+  },
+
+  /* ========== 6. AI Generation Guardrails ========== */
+  "ai": {
+    "forbid": [
+      { "pattern": "any\\s+`,?\\s*as", "reason": "avoid `any` type" },
+      { "pattern": "fetch\\(.+weatherapi\\.com", "reason": "stick to OpenWeatherMap" }
+    ],
+    "prefer": [
+      { "snippet": "import { createClient } from '@supabase/supabase-js';" },
+      { "snippet": "\"use client\";" }
+    ]
+  },
+
+  /* ========== 7. Test Coverage Goals ========== */
+  "quality": {
+    "minUnitTestCoverage": 0.6,
+    "minE2eTestsPerFeature": 1
+  }
+}

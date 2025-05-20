@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { TastingRecord } from '@/types/tasting';
+import EnvironmentInfo from '@/components/EnvironmentInfo';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -21,10 +22,10 @@ export default function NewRecord() {
     id: '',
     environment: {
       date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false }),
       weather: '',
-      temperature: '',
+      temperature: null,
       humidity: '',
-      timeOfDay: '',
       isAutoFetched: false,
     },
     coffee: {
@@ -176,6 +177,16 @@ export default function NewRecord() {
     }
   };
 
+  const handleEnvironmentChange = (key: keyof TastingRecord['environment'], value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      environment: {
+        ...prev.environment,
+        [key]: value
+      }
+    }));
+  };
+
   const ActionButton = ({ onClick, children }: { onClick: () => void, children: React.ReactNode }) => (
     <button
       type="button"
@@ -218,146 +229,11 @@ export default function NewRecord() {
         新しいテイスティング記録
       </h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 環境情報 */}
-        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            環境情報
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                日付
-              </label>
-              <input
-                type="date"
-                value={formData.environment.date}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    environment: {
-                      ...formData.environment,
-                      date: e.target.value,
-                    },
-                  })
-                }
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                天気
-              </label>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  value={formData.environment.weather}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      environment: {
-                        ...formData.environment,
-                        weather: e.target.value,
-                      },
-                    })
-                  }
-                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-                <ActionButton onClick={fetchWeather}>
-                  {weatherLoading ? '取得中...' : '自動取得'}
-                </ActionButton>
-              </div>
-              {weatherError && (
-                <div className="text-red-500 text-xs mt-1">
-                  {weatherError}
-                  <button
-                    type="button"
-                    className="ml-2 underline text-blue-600"
-                    onClick={fetchWeather}
-                  >
-                    再試行
-                  </button>
-                  <div className="mt-1 text-gray-500">APIキーやネットワーク設定をご確認ください。</div>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                気温
-              </label>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  value={formData.environment.temperature}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      environment: {
-                        ...formData.environment,
-                        temperature: e.target.value,
-                      },
-                    })
-                  }
-                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-                <ActionButton onClick={fetchWeather}>
-                  {weatherLoading ? '取得中...' : '自動取得'}
-                </ActionButton>
-              </div>
-              {weatherError && (
-                <div className="text-red-500 text-xs mt-1">
-                  {weatherError}
-                  <button
-                    type="button"
-                    className="ml-2 underline text-blue-600"
-                    onClick={fetchWeather}
-                  >
-                    再試行
-                  </button>
-                  <div className="mt-1 text-gray-500">APIキーやネットワーク設定をご確認ください。</div>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                時間帯
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={formData.environment.timeOfDay}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      environment: {
-                        ...formData.environment,
-                        timeOfDay: e.target.value,
-                      },
-                    })
-                  }
-                  className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-                <ActionButton onClick={() => {
-                  const hour = new Date().getHours();
-                  let timeOfDay = '';
-                  if (hour >= 5 && hour < 11) timeOfDay = '朝';
-                  else if (hour >= 11 && hour < 14) timeOfDay = '昼';
-                  else if (hour >= 14 && hour < 17) timeOfDay = '午後';
-                  else if (hour >= 17 && hour < 22) timeOfDay = '夕方';
-                  else timeOfDay = '夜';
-                  setFormData({
-                    ...formData,
-                    environment: {
-                      ...formData.environment,
-                      timeOfDay,
-                    },
-                  });
-                }}>
-                  自動設定
-                </ActionButton>
-              </div>
-            </div>
-          </div>
-        </section>
+        <EnvironmentInfo
+          formData={formData}
+          onChange={handleEnvironmentChange}
+          mode="new"
+        />
 
         {/* コーヒー情報 */}
         <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
