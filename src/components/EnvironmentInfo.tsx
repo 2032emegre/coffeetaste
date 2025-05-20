@@ -96,6 +96,29 @@ export default function EnvironmentInfo({ formData, onChange, mode = 'new' }: En
             </div>
           </div>
         )}
+        {/* 湿度 */}
+        {isViewMode ? (
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500">|</span>
+            <span className="text-gray-700">{formData.environment.humidity}％</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500">|</span>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={formData.environment.humidity ?? ''}
+                onChange={(e) => onChange('humidity', e.target.value === '' ? '' : e.target.value)}
+                className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+                min="0"
+                max="100"
+                step="1"
+              />
+              <span className="text-gray-500">％</span>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

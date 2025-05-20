@@ -7,6 +7,7 @@ import { TastingRecord } from '@/types/tasting';
 import EnvironmentInfo from '@/components/EnvironmentInfo';
 import AromaSection from '@/components/AromaSection';
 import CoffeeInfo from '@/components/CoffeeInfo';
+import RoastingRecordForm from '@/components/RoastingRecordForm';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -882,46 +883,34 @@ export default function NewRecord() {
 
       {/* roast用フォーム */}
       {recordType === 'roast' && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">焙煎記録</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">焙煎日</label>
-                <input type="date" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">豆名</label>
-                <input type="text" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">焙煎度</label>
-                <input type="text" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">焙煎時間（秒）</label>
-                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">焙煎温度（℃）</label>
-                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">コメント</label>
-              <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={4} />
-            </div>
-          </section>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? '保存中...' : '記録を保存'}
-            </button>
-          </div>
-        </form>
+        <RoastingRecordForm
+          onSubmit={async (data) => {
+            setIsSubmitting(true);
+            try {
+              // 必要に応じてデータ整形
+              const { id, ...insertData } = data;
+              const { error } = await supabase
+                .from('roast_records')
+                .insert([
+                  {
+                    ...insertData,
+                    created_at: new Date().toISOString(),
+                  },
+                ]);
+              if (error) throw error;
+              setShowSuccess(true);
+              setTimeout(() => {
+                router.push('/roast_records');
+              }, 1500);
+            } catch (error) {
+              alert('焙煎記録の保存に失敗しました。もう一度お試しください。');
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+          loading={isSubmitting}
+          error={weatherError}
+        />
       )}
 
       {/* shop用フォーム */}
