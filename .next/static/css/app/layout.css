@@ -788,6 +788,9 @@ video {
 .w-8 {
   width: 2rem;
 }
+.w-24 {
+  width: 6rem;
+}
 .min-w-0 {
   min-width: 0px;
 }
@@ -1120,6 +1123,9 @@ video {
 .pb-2 {
   padding-bottom: 0.5rem;
 }
+.pb-4 {
+  padding-bottom: 1rem;
+}
 .text-left {
   text-align: left;
 }
@@ -1301,6 +1307,11 @@ body {
 .hover\:bg-gray-900:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-gray-300:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-gray-900:hover {

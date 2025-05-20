@@ -58,4 +58,42 @@ export interface TastingRecord {
     comments: string;
     notes: string;
     created_at?: string;
+}
+
+// 店舗来店記録用の型
+export interface ShopVisitRecord {
+  id: string;
+  environment: {
+    date: string;
+    time: string;
+    weather: string;
+    temperature: number | null;
+    humidity?: string;
+    isAutoFetched: boolean;
+  };
+  shop: {
+    name: string;
+    link?: string;
+  };
+  items: Array<{
+    name: string;
+    price?: number;
+    isCoffee?: boolean;
+    origin?: string;
+    roastLevel?: string;
+    variety?: string;
+    method?: string; // 抽出法
+  }>;
+  tasting: {
+    acidity: number;
+    sweetness: number;
+    body: number;
+    balance: number;
+    cleanness: number;
+    aftertaste: number;
+    totalScore: number;
+  };
+  comments: string;
+  staffInfo?: string;
+  created_at?: string;
 } 

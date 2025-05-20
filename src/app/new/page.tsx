@@ -8,6 +8,7 @@ import EnvironmentInfo from '@/components/EnvironmentInfo';
 import AromaSection from '@/components/AromaSection';
 import CoffeeInfo from '@/components/CoffeeInfo';
 import RoastingRecordForm from '@/components/RoastingRecordForm';
+import ShopVisitForm from '@/components/ShopVisitForm';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -915,56 +916,27 @@ export default function NewRecord() {
 
       {/* shop用フォーム */}
       {recordType === 'shop' && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">店舗来店記録</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">店名</label>
-                <input type="text" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">店リンク</label>
-                <input type="url" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="https://" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">飲んだもの（カンマ区切りで複数可）</label>
-                <input type="text" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="例: カフェラテ, エスプレッソ" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">酸味</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">甘味</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ボディ</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">バランス</label>
-                <input type="number" min="1" max="5" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">コメント</label>
-              <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={4} />
-            </div>
-          </section>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? '保存中...' : '記録を保存'}
-            </button>
-          </div>
-        </form>
+        <ShopVisitForm
+          onSubmit={async (data) => {
+            setIsSubmitting(true);
+            try {
+              // 必要に応じてデータ整形
+              const { id, ...insertData } = data;
+              // ここでSupabase等に保存処理を追加可能
+              // 例: await supabase.from('shop_visits').insert([{ ...insertData, created_at: new Date().toISOString() }]);
+              setShowSuccess(true);
+              setTimeout(() => {
+                router.push('/records');
+              }, 1500);
+            } catch (error) {
+              alert('店舗来店記録の保存に失敗しました。もう一度お試しください。');
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+          loading={isSubmitting}
+          error={weatherError}
+        />
       )}
 
       {showSuccess && (
