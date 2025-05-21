@@ -10,18 +10,73 @@ const WEATHER_OPTIONS = [
 ] as const;
 
 type EnvironmentInfoProps = {
-  formData: TastingRecord;
+  formData: TastingRecord | any;
   onChange: (key: keyof TastingRecord['environment'], value: any) => void;
   mode?: 'new' | 'edit' | 'view';
+  recordType?: 'handdrip' | 'espresso' | 'roast' | 'shop';
 };
 
-export default function EnvironmentInfo({ formData, onChange, mode = 'new' }: EnvironmentInfoProps) {
+export default function EnvironmentInfo({ formData, onChange, mode = 'new', recordType }: EnvironmentInfoProps) {
   const isViewMode = mode === 'view';
 
   // 日付と時刻の表示用フォーマット
   const formatDateTime = (date: string, time: string) => {
     return `${date} ${time}`;
   };
+
+  // 店舗来店用のシンプルUI
+  if (recordType === 'shop') {
+    return (
+      <div className="flex flex-wrap items-center gap-4">
+        <input
+          type="date"
+          value={formData.environment.date}
+          onChange={(e) => onChange('date', e.target.value)}
+          className="rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+        />
+        <input
+          type="time"
+          value={formData.environment.time}
+          onChange={(e) => onChange('time', e.target.value)}
+          className="rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+        />
+        <span className="text-gray-500">|</span>
+        <select
+          value={formData.environment.weather}
+          onChange={(e) => onChange('weather', e.target.value)}
+          className="rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+        >
+          <option value="">選択してください</option>
+          {WEATHER_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
+        <span className="text-gray-500">|</span>
+        <input
+          type="number"
+          value={formData.environment.temperature ?? ''}
+          onChange={(e) => onChange('temperature', e.target.value === '' ? null : Number(e.target.value))}
+          className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+          min="-50"
+          max="50"
+          step="0.1"
+        />
+        <span className="text-gray-500">℃ |</span>
+        <input
+          type="number"
+          value={formData.environment.humidity ?? ''}
+          onChange={(e) => onChange('humidity', e.target.value === '' ? '' : e.target.value)}
+          className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+          min="0"
+          max="100"
+          step="1"
+        />
+        <span className="text-gray-500">％</span>
+      </div>
+    );
+  }
 
   return (
     <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">

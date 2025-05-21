@@ -1,6 +1,7 @@
 {
+  "/records/shop/[id]/page": "app/records/shop/[id]/page.js",
+  "/records/shop/[id]/edit/page": "app/records/shop/[id]/edit/page.js",
   "/records/page": "app/records/page.js",
   "/new/page": "app/new/page.js",
-  "/records/[id]/edit/page": "app/records/[id]/edit/page.js",
   "/page": "app/page.js"
 }

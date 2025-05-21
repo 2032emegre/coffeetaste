@@ -61,8 +61,8 @@ export interface TastingRecord {
 }
 
 // 店舗来店記録用の型
-export interface ShopVisitRecord {
-  id: string;
+export type ShopVisitRecord = {
+  id?: string;
   environment: {
     date: string;
     time: string;
@@ -73,27 +73,38 @@ export interface ShopVisitRecord {
   };
   shop: {
     name: string;
-    link?: string;
+    link: string;
   };
-  items: Array<{
+  items: {
     name: string;
-    price?: number;
-    isCoffee?: boolean;
-    origin?: string;
-    roastLevel?: string;
-    variety?: string;
+    price: number;
+    type?: string; // コーヒー/紅茶/その他
     method?: string; // 抽出法
-  }>;
+    methodOther?: string; // その他の抽出法
+    origin?: string; // 産地
+    roastLevel?: string; // 焙煎度
+    variety?: string; // 品種
+    attributes?: {
+      acidity?: number;
+      sweetness?: number;
+      richness?: number;
+      body?: number;
+      balance?: number;
+      cleanliness?: number;
+      aftertaste?: number;
+    };
+  }[];
   tasting: {
     acidity: number;
     sweetness: number;
+    richness: number;
     body: number;
     balance: number;
-    cleanness: number;
+    cleanliness: number;
     aftertaste: number;
     totalScore: number;
   };
-  comments: string;
+  comments?: string;
   staffInfo?: string;
   created_at?: string;
-} 
+}; 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
-import { TastingRecord } from '@/types/tasting';
+import { TastingRecord, ShopVisitRecord } from '@/types/tasting';
 import EnvironmentInfo from '@/components/EnvironmentInfo';
 import AromaSection from '@/components/AromaSection';
 import CoffeeInfo from '@/components/CoffeeInfo';
@@ -111,6 +111,35 @@ export default function NewRecord() {
     personalScore: 0,
     comments: '',
     notes: '',
+  });
+
+  // ShopVisitRecord型の初期値
+  const [shopFormData, setShopFormData] = useState<ShopVisitRecord>({
+    environment: {
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false }),
+      weather: '',
+      temperature: null,
+      humidity: '',
+      isAutoFetched: false,
+    },
+    shop: {
+      name: '',
+      link: '',
+    },
+    items: [],
+    tasting: {
+      acidity: 0,
+      sweetness: 0,
+      richness: 0,
+      body: 0,
+      balance: 0,
+      cleanliness: 0,
+      aftertaste: 0,
+      totalScore: 0,
+    },
+    comments: '',
+    staffInfo: '',
   });
 
   const tastingFields = [
@@ -917,16 +946,25 @@ export default function NewRecord() {
       {/* shop用フォーム */}
       {recordType === 'shop' && (
         <ShopVisitForm
+          initialData={shopFormData}
           onSubmit={async (data) => {
             setIsSubmitting(true);
             try {
-              // 必要に応じてデータ整形
               const { id, ...insertData } = data;
-              // ここでSupabase等に保存処理を追加可能
-              // 例: await supabase.from('shop_visits').insert([{ ...insertData, created_at: new Date().toISOString() }]);
+              const { toSupabaseRow } = await import('@/utils/supabase');
+              const row = toSupabaseRow({ ...insertData });
+              const { error } = await supabase
+                .from('shop_visit_records')
+                .insert([
+                  {
+                    ...row,
+                    created_at: new Date().toISOString(),
+                  },
+                ]);
+              if (error) throw error;
               setShowSuccess(true);
               setTimeout(() => {
-                router.push('/records');
+                router.push('/records?tab=shop');
               }, 1500);
             } catch (error) {
               alert('店舗来店記録の保存に失敗しました。もう一度お試しください。');
@@ -934,8 +972,8 @@ export default function NewRecord() {
               setIsSubmitting(false);
             }
           }}
-          loading={isSubmitting}
-          error={weatherError}
+          isSubmitting={isSubmitting}
+          submitError={weatherError}
         />
       )}
 
