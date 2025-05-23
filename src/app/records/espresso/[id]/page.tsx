@@ -135,7 +135,7 @@ export default function EspressoRecordDetail() {
             編集
           </button>
           <button
-            onClick={() => router.push('/records/espresso')}
+            onClick={() => router.push('/records?tab=espresso')}
             className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             一覧に戻る
@@ -144,93 +144,61 @@ export default function EspressoRecordDetail() {
       </div>
 
       {/* 環境情報 */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">環境情報</h2>
-        <EnvironmentInfo formData={record} onChange={() => {}} mode="view" recordType="espresso" />
-      </section>
+      <EnvironmentInfo formData={record} onChange={() => {}} mode="view" recordType="espresso" />
 
       {/* コーヒー情報 */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">コーヒー情報</h2>
-        <CoffeeInfo formData={record} onChange={() => {}} mode="view" />
-      </section>
+      <CoffeeInfo formData={record} onChange={() => {}} mode="view" />
 
       {/* 抽出レシピ */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">抽出レシピ</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">抽出レシピ</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <span className="block text-sm font-medium text-gray-700 mb-1">種類</span>
-            <div className="text-gray-900">
-              {record.brewing.type === 'other' ? record.brewing.typeOther : record.brewing.type}
-            </div>
+            <div className="text-gray-900">{record.brewing.type === 'その他' ? record.brewing.typeOther : record.brewing.type}</div>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">グラインダー</span>
-            <div className="text-gray-900">{record.brewing.grinder}</div>
-          </div>
-          <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">挽き目</span>
-            <div className="text-gray-900">{record.brewing.grindSetting}</div>
-          </div>
-          <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">豆量 (g)</span>
+            <span className="block text-sm font-medium text-gray-700 mb-1">豆（g）</span>
             <div className="text-gray-900">{record.brewing.coffeeAmount}</div>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">抽出量 (g)</span>
+            <span className="block text-sm font-medium text-gray-700 mb-1">抽出量（ml）</span>
             <div className="text-gray-900">{record.brewing.yield}</div>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">抽出時間</span>
-            <div className="text-gray-900">{record.brewing.brewTime}</div>
-          </div>
-          <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">温度</span>
+            <span className="block text-sm font-medium text-gray-700 mb-1">温度（℃）</span>
             <div className="text-gray-900">{record.brewing.temperature}</div>
           </div>
-          <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">圧力</span>
-            <div className="text-gray-900">{record.brewing.pressure}</div>
+          <div className="md:col-span-2">
+            <span className="block text-sm font-medium text-gray-700 mb-1">メモ</span>
+            <div className="text-gray-900 whitespace-pre-wrap">{record.brewing.notes}</div>
           </div>
-          {record.brewing.notes && (
-            <div className="col-span-full">
-              <span className="block text-sm font-medium text-gray-700 mb-1">メモ</span>
-              <div className="text-gray-900 whitespace-pre-wrap">{record.brewing.notes}</div>
-            </div>
-          )}
         </div>
       </section>
 
+      {/* LE NEZ（香り） */}
+      <AromaSection type="nose" formData={record} onChange={() => {}} mode="view" />
+
+      {/* LES ARÔMES（アロマ） */}
+      <AromaSection type="aroma" formData={record} onChange={() => {}} mode="view" />
+
       {/* クレマ評価 */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">クレマ評価</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">色</span>
-                <div className="text-gray-900">{record.crema.color}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">厚さ</span>
-                <div className="text-gray-900">{record.crema.thickness}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">持続性</span>
-                <div className="text-gray-900">{record.crema.persistence}/5</div>
-              </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">クレマ評価</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { key: 'color', label: '色（淡→濃）', value: record.crema.color },
+            { key: 'thickness', label: '厚み', value: record.crema.thickness },
+            { key: 'persistence', label: '持続性', value: record.crema.persistence },
+          ].map(({ key, label, value }) => (
+            <div key={key}>
+              <span className="block text-sm font-medium text-gray-700 mb-1">{label}</span>
+              <div className="text-gray-900">{value}/5</div>
             </div>
-            {record.crema.notes && (
-              <div className="mt-4">
-                <span className="block text-sm font-medium text-gray-700 mb-1">メモ</span>
-                <div className="text-gray-900 whitespace-pre-wrap">{record.crema.notes}</div>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-center items-center">
+          ))}
+          <div className="md:col-span-3 flex justify-center items-center">
             <div className="w-64 h-64">
-              <RadarChart tasting={cremaTasting} />
+              <RadarChart tasting={cremaTasting} mode="crema" />
             </div>
           </div>
         </div>
@@ -238,82 +206,48 @@ export default function EspressoRecordDetail() {
 
       {/* テイスティング評価 */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">テイスティング評価</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">テイスティング評価</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">酸味</span>
-                <div className="text-gray-900">{record.tasting.acidity}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">甘味</span>
-                <div className="text-gray-900">{record.tasting.sweetness}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">コク</span>
-                <div className="text-gray-900">{record.tasting.richness}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">ボディ</span>
-                <div className="text-gray-900">{record.tasting.body}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">バランス</span>
-                <div className="text-gray-900">{record.tasting.balance}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">クリーン度</span>
-                <div className="text-gray-900">{record.tasting.cleanliness}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">余韻</span>
-                <div className="text-gray-900">{record.tasting.aftertaste}/5</div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">総合評価</span>
-                <div className="text-gray-900">{record.tasting.totalScore}/35</div>
-              </div>
+          {[
+            { key: 'acidity', label: '酸味', value: record.tasting.acidity },
+            { key: 'bitterness', label: '苦味', value: record.tasting.bitterness },
+            { key: 'sweetness', label: '甘み', value: record.tasting.sweetness },
+            { key: 'body', label: 'ボディ', value: record.tasting.body },
+            { key: 'clarity', label: 'クリア度', value: record.tasting.clarity },
+            { key: 'balance', label: 'バランス', value: record.tasting.balance },
+            { key: 'aftertaste', label: '余韻', value: record.tasting.aftertaste },
+          ].map(({ key, label, value }) => (
+            <div key={key}>
+              <span className="block text-sm font-medium text-gray-700 mb-1">{label}</span>
+              <div className="text-gray-900">{value}/5</div>
             </div>
-          </div>
-          <div className="flex justify-center items-center">
+          ))}
+          <div className="md:col-span-2 flex justify-center items-center">
             <div className="w-64 h-64">
-              <RadarChart tasting={record.tasting} />
+              <RadarChart tasting={record.tasting} mode="espresso-taste" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* 香り評価 */}
+      {/* 総合評価 */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">香り評価</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">LE NEZ</h3>
-            <AromaSection type="nose" formData={record} onChange={() => {}} mode="view" />
+            <span className="block text-sm font-medium text-gray-700 mb-1">個人スコア (0-100)</span>
+            <div className="text-2xl font-bold text-gray-900">{record.personalScore}</div>
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">LES ARÔMES</h3>
-            <AromaSection type="aroma" formData={record} onChange={() => {}} mode="view" />
+            <span className="block text-sm font-medium text-gray-700 mb-1">評価点数（クレマ＋テイスティング合計）</span>
+            <div className="text-2xl font-bold text-gray-900">{(record.crema.color + record.crema.thickness + record.crema.persistence + record.tasting.acidity + record.tasting.bitterness + record.tasting.sweetness + record.tasting.body + record.tasting.clarity + record.tasting.balance + record.tasting.aftertaste) || 0}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">評価・気づき</span>
+            <div className="text-gray-900 whitespace-pre-wrap">{record.comments || '記録なし'}</div>
           </div>
         </div>
       </section>
-
-      {/* コメント */}
-      {record.comments && (
-        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">コメント</h2>
-          <div className="text-gray-900 whitespace-pre-wrap">{record.comments}</div>
-        </section>
-      )}
-
-      {/* メモ */}
-      {record.notes && (
-        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">メモ</h2>
-          <div className="text-gray-900 whitespace-pre-wrap">{record.notes}</div>
-        </section>
-      )}
     </div>
   );
 } 

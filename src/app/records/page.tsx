@@ -488,12 +488,18 @@ export default function RecordList() {
                             <div className="mb-2">
                               <div className="font-bold text-gray-700 text-xs mb-1">クレマ</div>
                               <div className="flex justify-center items-center">
-                                <RadarChart tasting={{
-                                  acidity: espresso.crema_color || 0,
-                                  sweetness: espresso.crema_thickness || 0,
-                                  richness: espresso.crema_persistence || 0,
-                                  body: 0, balance: 0, cleanliness: 0, aftertaste: 0
-                                }} />
+                                <RadarChart
+                                  tasting={{
+                                    acidity: espresso.crema_color || 0,
+                                    sweetness: espresso.crema_thickness || 0,
+                                    richness: espresso.crema_persistence || 0,
+                                    body: 0,
+                                    balance: 0,
+                                    cleanliness: 0,
+                                    aftertaste: 0,
+                                  }}
+                                  mode="crema"
+                                />
                               </div>
                             </div>
                             {/* 味わい（レーダーチャート） */}

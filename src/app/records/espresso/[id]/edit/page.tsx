@@ -228,321 +228,189 @@ export default function EditEspressoRecord() {
       </div>
 
       {/* 環境情報 */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">環境情報</h2>
-        <EnvironmentInfo formData={record} onChange={handleChange} mode="edit" recordType="espresso" />
-      </section>
+      <EnvironmentInfo formData={record} onChange={handleChange} mode="edit" recordType="espresso" />
 
       {/* コーヒー情報 */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">コーヒー情報</h2>
-        <CoffeeInfo formData={record} onChange={handleChange} mode="edit" />
-      </section>
+      <CoffeeInfo formData={record} onChange={handleChange} mode="edit" />
 
       {/* 抽出レシピ */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">抽出レシピ</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">抽出レシピ</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">種類</label>
             <select
               value={record.brewing.type}
-              onChange={(e) => handleChange('brewing.type', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              onChange={e => handleChange('brewing.type', e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
             >
-              <option value="single">シングル</option>
-              <option value="double">ダブル</option>
-              <option value="ristretto">リストレット</option>
-              <option value="lungo">ルンゴ</option>
-              <option value="other">その他</option>
+              <option value="">選択してください</option>
+              <option value="エスプレッソ">エスプレッソ</option>
+              <option value="アメリカーノ">アメリカーノ</option>
+              <option value="リストレット">リストレット</option>
+              <option value="その他">その他</option>
             </select>
-            {record.brewing.type === 'other' && (
+            {record.brewing.type === 'その他' && (
               <input
                 type="text"
                 value={record.brewing.typeOther || ''}
-                onChange={(e) => handleChange('brewing.typeOther', e.target.value)}
-                placeholder="種類を入力"
-                className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+                onChange={e => handleChange('brewing.typeOther', e.target.value)}
+                placeholder="その他の種類を記入"
+                className="w-full mt-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               />
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">グラインダー</label>
-            <input
-              type="text"
-              value={record.brewing.grinder}
-              onChange={(e) => handleChange('brewing.grinder', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">挽き目</label>
-            <input
-              type="text"
-              value={record.brewing.grindSetting}
-              onChange={(e) => handleChange('brewing.grindSetting', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">豆量 (g)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">豆（g）</label>
             <input
               type="number"
               value={record.brewing.coffeeAmount}
-              onChange={(e) => handleChange('brewing.coffeeAmount', parseFloat(e.target.value))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              onChange={e => handleChange('brewing.coffeeAmount', parseFloat(e.target.value))}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">抽出量 (g)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">抽出量（ml）</label>
             <input
               type="number"
               value={record.brewing.yield}
-              onChange={(e) => handleChange('brewing.yield', parseFloat(e.target.value))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              onChange={e => handleChange('brewing.yield', parseFloat(e.target.value))}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">抽出時間</label>
-            <input
-              type="text"
-              value={record.brewing.brewTime}
-              onChange={(e) => handleChange('brewing.brewTime', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">温度</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">温度（℃）</label>
             <input
               type="number"
               value={record.brewing.temperature}
-              onChange={(e) => handleChange('brewing.temperature', parseFloat(e.target.value))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              onChange={e => handleChange('brewing.temperature', parseFloat(e.target.value))}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">圧力</label>
-            <input
-              type="number"
-              value={record.brewing.pressure}
-              onChange={(e) => handleChange('brewing.pressure', parseFloat(e.target.value))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-            />
+          <div className="md:col-span-2 flex items-center gap-2 mt-2">
+            <input type="checkbox" id="flair" className="mr-2" />
+            <label htmlFor="flair" className="text-sm font-medium text-gray-700">flair</label>
+            <input type="text" className="w-full ml-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="flairでの抽出に関するメモ" />
           </div>
-          <div className="col-span-full">
+          <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
             <textarea
               value={record.brewing.notes || ''}
-              onChange={(e) => handleChange('brewing.notes', e.target.value)}
+              onChange={e => handleChange('brewing.notes', e.target.value)}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
             />
           </div>
         </div>
       </section>
 
+      {/* LE NEZ（香り） */}
+      <AromaSection type="nose" formData={record} onChange={handleChange} mode="edit" />
+
+      {/* LES ARÔMES（アロマ） */}
+      <AromaSection type="aroma" formData={record} onChange={handleChange} mode="edit" />
+
       {/* クレマ評価 */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">クレマ評価</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">色</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.crema.color}
-                  onChange={(e) => handleChange('crema.color', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">厚さ</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.crema.thickness}
-                  onChange={(e) => handleChange('crema.thickness', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">持続性</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.crema.persistence}
-                  onChange={(e) => handleChange('crema.persistence', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">クレマ評価</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { key: 'color', label: '色（淡→濃）' },
+            { key: 'thickness', label: '厚み' },
+            { key: 'persistence', label: '持続性' },
+          ].map(({ key, label }) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+              <div className="flex gap-2">
+                {[1,2,3,4,5].map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-base font-semibold transition-colors ${record.crema[key] === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                    style={{ aspectRatio: '1 / 1' }}
+                    onClick={() => handleChange(`crema.${key}`, v)}
+                  >
+                    {v}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
-              <textarea
-                value={record.crema.notes || ''}
-                onChange={(e) => handleChange('crema.notes', e.target.value)}
-                rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-              />
-            </div>
-          </div>
-          <div className="flex justify-center items-center">
-            <div className="w-64 h-64">
-              <RadarChart tasting={cremaTasting} />
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* テイスティング評価 */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">テイスティング評価</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">テイスティング評価</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">酸味</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.acidity}
-                  onChange={(e) => handleChange('tasting.acidity', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">甘味</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.sweetness}
-                  onChange={(e) => handleChange('tasting.sweetness', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">コク</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.richness}
-                  onChange={(e) => handleChange('tasting.richness', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ボディ</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.body}
-                  onChange={(e) => handleChange('tasting.body', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">バランス</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.balance}
-                  onChange={(e) => handleChange('tasting.balance', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">クリーン度</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.cleanliness}
-                  onChange={(e) => handleChange('tasting.cleanliness', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">余韻</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.5"
-                  value={record.tasting.aftertaste}
-                  onChange={(e) => handleChange('tasting.aftertaste', parseFloat(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">総合評価</label>
-                <div className="mt-1 text-gray-900">
-                  {record.tasting.totalScore}/35
-                </div>
+          {[
+            { key: 'acidity', label: '酸味' },
+            { key: 'bitterness', label: '苦味' },
+            { key: 'sweetness', label: '甘み' },
+            { key: 'body', label: 'ボディ' },
+            { key: 'clarity', label: 'クリア度' },
+            { key: 'balance', label: 'バランス' },
+            { key: 'aftertaste', label: '余韻' },
+          ].map(({ key, label }) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+              <div className="flex gap-2">
+                {[1,2,3,4,5].map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-base font-semibold transition-colors ${record.tasting[key] === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                    style={{ aspectRatio: '1 / 1' }}
+                    onClick={() => handleChange(`tasting.${key}`, v)}
+                  >
+                    {v}
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
-          <div className="flex justify-center items-center">
-            <div className="w-64 h-64">
-              <RadarChart tasting={record.tasting} />
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* 香り評価 */}
+      {/* 総合評価 */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">香り評価</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">LE NEZ</h3>
-            <AromaSection type="nose" formData={record} onChange={handleChange} mode="edit" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">個人スコア (0-100)</label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value={record.personalScore}
+                onChange={e => handleChange('personalScore', Number(e.target.value))}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                style={{ accentColor: '#111' }}
+              />
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={record.personalScore}
+                onChange={e => handleChange('personalScore', Number(e.target.value))}
+                className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
+              />
+              <span className="text-2xl font-bold text-gray-900 w-16 text-right">{record.personalScore}</span>
+            </div>
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">LES ARÔMES</h3>
-            <AromaSection type="aroma" formData={record} onChange={handleChange} mode="edit" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">評価・気づき</label>
+            <textarea
+              value={record.comments || ''}
+              onChange={e => handleChange('comments', e.target.value)}
+              placeholder="コメントや気づき、改善点などを記入してください"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              rows={6}
+            />
           </div>
         </div>
-      </section>
-
-      {/* コメント */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">コメント</h2>
-        <textarea
-          value={record.comments || ''}
-          onChange={(e) => handleChange('comments', e.target.value)}
-          rows={4}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-        />
-      </section>
-
-      {/* メモ */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">メモ</h2>
-        <textarea
-          value={record.notes || ''}
-          onChange={(e) => handleChange('notes', e.target.value)}
-          rows={4}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-        />
       </section>
     </form>
   );
