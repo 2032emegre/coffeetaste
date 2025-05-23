@@ -11,6 +11,8 @@ import ShopVisitList from '@/components/ShopVisitList';
 import ShopVisitFilter from '@/components/ShopVisitFilter';
 import ShopVisitForm from '@/components/ShopVisitForm';
 import { useRouter } from 'next/navigation';
+import { RoastRecord } from '@/types/roast';
+import RoastRecordCard from '@/components/RoastRecordCard';
 
 type TastingKey = keyof TastingRecord['tasting'];
 type TastingLabel = {
@@ -175,7 +177,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function RecordList() {
-  const [records, setRecords] = useState<Partial<TastingRecord>[]>([]);
+  const [records, setRecords] = useState<(Partial<TastingRecord> | RoastRecord)[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<'personalScore' | 'date' | 'score'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -226,8 +228,16 @@ export default function RecordList() {
           .order('created_at', { ascending: false });
         data = res.data;
         error = res.error;
+      } else if (recordType === 'roast') {
+        // 焙煎記録を取得
+        const res = await supabase
+          .from('roast_records')
+          .select('*')
+          .order('roast_date', { ascending: false });
+        data = res.data;
+        error = res.error;
       } else {
-        // その他（shop, roast）は現状何もしない
+        // その他（shop）は現状何もしない
         setLoading(false);
         return;
       }
@@ -246,44 +256,80 @@ export default function RecordList() {
 
   // フィルター処理
   const filteredRecords = records.filter((record) => {
-    // コーヒー名検索
-    if (searchName && !(record.coffee?.name || '').toLowerCase().includes(searchName.toLowerCase())) {
-      return false;
-    }
-    // 産地フィルタ（部分一致・大文字小文字無視）
-    if (originFilter && !(record.coffee?.origin || '').toLowerCase().includes(originFilter.toLowerCase())) {
-      return false;
-    }
-    // 品種フィルタ（部分一致・大文字小文字無視）
-    if (varietyFilter && !(record.coffee?.variety || '').toLowerCase().includes(varietyFilter.toLowerCase())) {
-      return false;
-    }
-    // テイスティング項目フィルタ
-    for (const key in tastingFilters) {
-      const filterValue = tastingFilters[key as TastingKey];
-      if (filterValue && record.tasting?.[key as TastingKey] !== filterValue) {
+    if (recordType === 'roast') {
+      const roastRecord = record as RoastRecord;
+      // 豆名検索
+      if (searchName && !roastRecord.bean_name.toLowerCase().includes(searchName.toLowerCase())) {
         return false;
       }
+      // 産地フィルタ
+      if (originFilter && !roastRecord.origin.toLowerCase().includes(originFilter.toLowerCase())) {
+        return false;
+      }
+      // 品種フィルタ
+      if (varietyFilter && !roastRecord.variety.toLowerCase().includes(varietyFilter.toLowerCase())) {
+        return false;
+      }
+      return true;
+    } else {
+      const tastingRecord = record as Partial<TastingRecord>;
+      // コーヒー名検索
+      if (searchName && !(tastingRecord.coffee?.name || '').toLowerCase().includes(searchName.toLowerCase())) {
+        return false;
+      }
+      // 産地フィルタ
+      if (originFilter && !(tastingRecord.coffee?.origin || '').toLowerCase().includes(originFilter.toLowerCase())) {
+        return false;
+      }
+      // 品種フィルタ
+      if (varietyFilter && !(tastingRecord.coffee?.variety || '').toLowerCase().includes(varietyFilter.toLowerCase())) {
+        return false;
+      }
+      // テイスティング項目フィルタ
+      for (const key in tastingFilters) {
+        const filterValue = tastingFilters[key as TastingKey];
+        if (filterValue && tastingRecord.tasting?.[key as TastingKey] !== filterValue) {
+          return false;
+        }
+      }
+      return true;
     }
-    // タイプで絞り込み
-    if ((record as any).type && (record as any).type !== recordType) return false;
-    return true;
   });
 
   // 並び替え処理
   const sortedRecords = [...filteredRecords].sort((a, b) => {
-    if (sortKey === 'personalScore') {
-      const scoreA = a.personalScore || 0;
-      const scoreB = b.personalScore || 0;
-      return sortOrder === 'asc' ? scoreA - scoreB : scoreB - scoreA;
-    } else if (sortKey === 'date') {
-      const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-    } else if (sortKey === 'score') {
-      const scoreA = a.tasting?.totalScore || 0;
-      const scoreB = b.tasting?.totalScore || 0;
-      return sortOrder === 'asc' ? scoreA - scoreB : scoreB - scoreA;
+    if (recordType === 'roast') {
+      const roastA = a as RoastRecord;
+      const roastB = b as RoastRecord;
+      if (sortKey === 'personalScore') {
+        const scoreA = roastA.personal_score || 0;
+        const scoreB = roastB.personal_score || 0;
+        return sortOrder === 'asc' ? scoreA - scoreB : scoreB - scoreA;
+      } else if (sortKey === 'date') {
+        const dateA = roastA.roast_date ? new Date(roastA.roast_date).getTime() : 0;
+        const dateB = roastB.roast_date ? new Date(roastB.roast_date).getTime() : 0;
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      } else if (sortKey === 'score') {
+        const scoreA = roastA.overall_total_score || 0;
+        const scoreB = roastB.overall_total_score || 0;
+        return sortOrder === 'asc' ? scoreA - scoreB : scoreB - scoreA;
+      }
+    } else {
+      const tastingA = a as Partial<TastingRecord>;
+      const tastingB = b as Partial<TastingRecord>;
+      if (sortKey === 'personalScore') {
+        const scoreA = tastingA.personalScore || 0;
+        const scoreB = tastingB.personalScore || 0;
+        return sortOrder === 'asc' ? scoreA - scoreB : scoreB - scoreA;
+      } else if (sortKey === 'date') {
+        const dateA = tastingA.timestamp ? new Date(tastingA.timestamp).getTime() : 0;
+        const dateB = tastingB.timestamp ? new Date(tastingB.timestamp).getTime() : 0;
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      } else if (sortKey === 'score') {
+        const scoreA = tastingA.tasting?.totalScore || 0;
+        const scoreB = tastingB.tasting?.totalScore || 0;
+        return sortOrder === 'asc' ? scoreA - scoreB : scoreB - scoreA;
+      }
     }
     return 0;
   });
@@ -429,26 +475,28 @@ export default function RecordList() {
             <>
               <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
                 <h1 className="text-3xl font-bold text-gray-900">記録一覧</h1>
-                <div className="flex gap-2 items-center bg-white border border-gray-300 rounded px-3 py-2">
-                  <label className="text-sm text-gray-700">並べ替え:</label>
-                  <select
-                    value={sortKey}
-                    onChange={e => setSortKey(e.target.value as 'personalScore' | 'date' | 'score')}
-                    className="border border-gray-400 rounded px-2 py-1 bg-white text-gray-900"
-                  >
-                    {SORT_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={sortOrder}
-                    onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
-                    className="border border-gray-400 rounded px-2 py-1 bg-white text-gray-900"
-                  >
-                    <option value="asc">昇順</option>
-                    <option value="desc">降順</option>
-                  </select>
-                </div>
+                {recordType !== 'roast' && (
+                  <div className="flex gap-2 items-center bg-white border border-gray-300 rounded px-3 py-2">
+                    <label className="text-sm text-gray-700">並べ替え:</label>
+                    <select
+                      value={sortKey}
+                      onChange={e => setSortKey(e.target.value as 'personalScore' | 'date' | 'score')}
+                      className="border border-gray-400 rounded px-2 py-1 bg-white text-gray-900"
+                    >
+                      {SORT_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={sortOrder}
+                      onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
+                      className="border border-gray-400 rounded px-2 py-1 bg-white text-gray-900"
+                    >
+                      <option value="asc">昇順</option>
+                      <option value="desc">降順</option>
+                    </select>
+                  </div>
+                )}
               </div>
               {loading ? (
                 <div className="text-center text-gray-500 py-12">読み込み中...</div>
@@ -551,18 +599,35 @@ export default function RecordList() {
                           </div>
                         </div>
                       );
+                    } else if (recordType === 'roast') {
+                      return (
+                        <RoastRecordCard
+                          key={record.id}
+                          record={record as RoastRecord}
+                          onDelete={handleDelete}
+                        />
+                      );
                     } else {
-                      // 既存のハンドドリップカード
+                      const tastingRecord = record as Partial<TastingRecord>;
                       return (
                         <div key={record.id} className="bg-white border border-gray-300 rounded-lg shadow-sm flex flex-col h-full">
                           {/* タイトル・スコア・日付（上部） */}
                           <div className="border-b border-gray-200 px-6 pt-6 pb-3">
-                            <div className="text-xs text-gray-500 mb-1">{formatDateOnly(record.created_at)}</div>
+                            <div className="text-xs text-gray-500 mb-1">
+                              {tastingRecord.timestamp?.toLocaleDateString('ja-JP')}
+                            </div>
                             <div className="flex items-end justify-between">
-                              <div className="text-2xl font-bold text-gray-900 truncate max-w-[12em]">{record.coffee?.name}</div>
+                              <div className="text-2xl font-bold text-gray-900 truncate max-w-[12em]">
+                                {tastingRecord.coffee?.name}
+                              </div>
                               <div className="flex flex-col items-end min-w-0 ml-2">
-                                <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">{record.personalScore}<span className="text-xs font-normal text-gray-600">/100</span></div>
-                                <div className="text-xs text-gray-600 whitespace-nowrap">評価スコア: {record.tasting?.totalScore}/35</div>
+                                <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
+                                  {tastingRecord.personalScore}
+                                  <span className="text-xs font-normal text-gray-600">/100</span>
+                                </div>
+                                <div className="text-xs text-gray-600 whitespace-nowrap">
+                                  評価スコア: {tastingRecord.tasting?.totalScore}/35
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -570,64 +635,91 @@ export default function RecordList() {
                           <div className="flex-1 flex flex-col px-6 py-4">
                             {/* 産地情報 */}
                             <div className="mb-2">
-                              <div className="font-bold text-gray-700">産地: <span className="font-normal text-gray-900">{record.coffee?.origin}</span></div>
-                              <div className="font-bold text-gray-700">精製方式: <span className="font-normal text-gray-900">{record.coffee?.process}</span></div>
-                              <div className="font-bold text-gray-700">品種: <span className="font-normal text-gray-900">{record.coffee?.variety}</span></div>
+                              <div className="font-bold text-gray-700">
+                                産地: <span className="font-normal text-gray-900">{tastingRecord.coffee?.origin}</span>
+                              </div>
+                              <div className="font-bold text-gray-700">
+                                精製方式: <span className="font-normal text-gray-900">{tastingRecord.coffee?.process}</span>
+                              </div>
+                              <div className="font-bold text-gray-700">
+                                品種: <span className="font-normal text-gray-900">{tastingRecord.coffee?.variety}</span>
+                              </div>
                             </div>
                             {/* 抽出レシピ */}
                             <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs leading-relaxed mb-2">
                               <div className="font-bold text-gray-700 mb-2">抽出レシピ</div>
-                              <div className="mb-1 font-bold">ドリッパー: <span className="font-normal text-gray-900">{record.brewing?.dripper}</span></div>
-                              <div className="mb-1 font-bold">グラインダー: <span className="font-normal text-gray-900">{record.brewing?.grinder}</span></div>
-                              <div className="mb-1 font-bold">挽き目: <span className="font-normal text-gray-900">{record.brewing?.grindSize}</span></div>
-                              <div className="mb-1 font-bold">豆量: <span className="font-normal text-gray-900">{record.brewing?.coffeeAmount} g</span></div>
-                              <div className="mb-1 font-bold">湯量: <span className="font-normal text-gray-900">{record.brewing?.waterAmount} ml</span></div>
-                              <div className="mb-1 font-bold">抽出時間: <span className="font-normal text-gray-900">{record.brewing?.brewTime}</span></div>
-                              <div className="mb-1 font-bold">温度: <span className="font-normal text-gray-900">{record.brewing?.temperature}</span></div>
-                              <div className="font-bold">蒸らし: <span className="font-normal text-gray-900">{record.brewing?.bloomAmount} / {record.brewing?.bloomTime}</span></div>
+                              <div className="mb-1 font-bold">
+                                ドリッパー: <span className="font-normal text-gray-900">{tastingRecord.brewing?.dripper}</span>
+                              </div>
+                              <div className="mb-1 font-bold">
+                                グラインダー: <span className="font-normal text-gray-900">{tastingRecord.brewing?.grinder}</span>
+                              </div>
+                              <div className="mb-1 font-bold">
+                                挽き目: <span className="font-normal text-gray-900">{tastingRecord.brewing?.grindSize}</span>
+                              </div>
+                              <div className="mb-1 font-bold">
+                                豆量: <span className="font-normal text-gray-900">{tastingRecord.brewing?.coffeeAmount} g</span>
+                              </div>
+                              <div className="mb-1 font-bold">
+                                湯量: <span className="font-normal text-gray-900">{tastingRecord.brewing?.waterAmount} ml</span>
+                              </div>
+                              <div className="mb-1 font-bold">
+                                抽出時間: <span className="font-normal text-gray-900">{tastingRecord.brewing?.brewTime}</span>
+                              </div>
+                              <div className="mb-1 font-bold">
+                                温度: <span className="font-normal text-gray-900">{tastingRecord.brewing?.temperature}</span>
+                              </div>
+                              <div className="font-bold">
+                                蒸らし: <span className="font-normal text-gray-900">
+                                  {tastingRecord.brewing?.bloomAmount} / {tastingRecord.brewing?.bloomTime}
+                                </span>
+                              </div>
                             </div>
                             {/* レーダーチャート */}
                             <div className="flex justify-center items-center my-4">
-                              <RadarChart tasting={record.tasting ?? defaultTasting} />
+                              <RadarChart tasting={tastingRecord.tasting ?? defaultTasting} />
                             </div>
                             {/* 香りのノート */}
                             <div className="space-y-2 text-xs mb-2">
                               <div>
                                 <span className="font-medium text-gray-900">LE NEZ</span>
-                                <span className="ml-2 text-gray-700">{formatAromaNotes('nose', record)}</span>
+                                <span className="ml-2 text-gray-700">{formatAromaNotes('nose', tastingRecord)}</span>
                               </div>
                               <div>
                                 <span className="font-medium text-gray-900">LES ARÔMES</span>
-                                <span className="ml-2 text-gray-700">{formatAromaNotes('aroma', record)}</span>
+                                <span className="ml-2 text-gray-700">{formatAromaNotes('aroma', tastingRecord)}</span>
                               </div>
                             </div>
                             {/* コメント */}
                             <div className="border-t border-gray-100 pt-2 mt-2 text-xs text-gray-700">
                               <div className="font-medium text-gray-900 mb-1">総合評価</div>
-                              {record.comments ? (
-                                <div className="whitespace-pre-wrap">{record.comments}</div>
+                              {tastingRecord.comments ? (
+                                <div className="whitespace-pre-wrap">{tastingRecord.comments}</div>
                               ) : (
                                 <div className="text-gray-500">記録なし</div>
                               )}
                             </div>
                             {/* 操作ボタン */}
-                            <div className="mt-3 flex justify-end gap-2">
-                              <Link
-                                href={`/records/${record.id}`}
-                                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
+                            <div className="mt-auto pt-4 flex justify-end space-x-2">
+                              <button
+                                onClick={() => router.push(`/records/${record.id}`)}
+                                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
                               >
-                                詳細を見る →
-                              </Link>
-                              <Link
-                                href={`/records/${record.id}/edit`}
-                                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
+                                詳細を見る
+                              </button>
+                              <button
+                                onClick={() => router.push(`/records/${record.id}/edit`)}
+                                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
                               >
                                 編集
-                              </Link>
+                              </button>
                               <button
-                                type="button"
-                                className="text-xs sm:text-sm text-gray-600 hover:text-white transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-900"
-                                onClick={() => handleDelete(record.id)}
+                                onClick={() => {
+                                  if (window.confirm('この記録を削除してもよろしいですか？')) {
+                                    handleDelete(record.id);
+                                  }
+                                }}
+                                className="px-3 py-1.5 text-xs font-medium text-red-700 bg-white border border-red-300 rounded-md shadow-sm hover:bg-red-50"
                               >
                                 削除
                               </button>
