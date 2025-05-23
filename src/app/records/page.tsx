@@ -207,10 +207,30 @@ export default function RecordList() {
   // Supabaseから記録一覧を取得
   useEffect(() => {
     const fetchRecords = async () => {
-      const { data, error } = await supabase
-        .from('tasting_records')
-        .select('*')
-        .order('created_at', { ascending: false });
+      setLoading(true);
+      let data = null;
+      let error = null;
+      if (recordType === 'espresso') {
+        // エスプレッソ記録を取得
+        const res = await supabase
+          .from('espresso_records')
+          .select('*')
+          .order('created_at', { ascending: false });
+        data = res.data;
+        error = res.error;
+      } else if (recordType === 'handdrip') {
+        // ハンドドリップ記録を取得
+        const res = await supabase
+          .from('tasting_records')
+          .select('*')
+          .order('created_at', { ascending: false });
+        data = res.data;
+        error = res.error;
+      } else {
+        // その他（shop, roast）は現状何もしない
+        setLoading(false);
+        return;
+      }
       if (error) {
         console.error('記録一覧の取得に失敗:', error);
         setLoading(false);
@@ -222,7 +242,7 @@ export default function RecordList() {
       setLoading(false);
     };
     fetchRecords();
-  }, []);
+  }, [recordType]);
 
   // フィルター処理
   const filteredRecords = records.filter((record) => {
@@ -434,88 +454,183 @@ export default function RecordList() {
                 <div className="text-center text-gray-500 py-12">読み込み中...</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                  {sortedRecords.map((record) => (
-                    <div key={record.id} className="bg-white border border-gray-300 rounded-lg shadow-sm flex flex-col h-full">
-                      {/* タイトル・スコア・日付（上部） */}
-                      <div className="border-b border-gray-200 px-6 pt-6 pb-3">
-                        <div className="text-xs text-gray-500 mb-1">{formatDateOnly(record.created_at)}</div>
-                        <div className="flex items-end justify-between">
-                          <div className="text-2xl font-bold text-gray-900 truncate max-w-[12em]">{record.coffee?.name}</div>
-                          <div className="flex flex-col items-end min-w-0 ml-2">
-                            <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">{record.personalScore}<span className="text-xs font-normal text-gray-600">/100</span></div>
-                            <div className="text-xs text-gray-600 whitespace-nowrap">評価スコア: {record.tasting?.totalScore}/35</div>
+                  {sortedRecords.map((record) => {
+                    if (recordType === 'espresso') {
+                      const espresso = record as any;
+                      return (
+                        <div key={espresso.id} className="relative bg-white border border-gray-300 rounded-lg shadow-sm flex flex-col h-full">
+                          {/* 左上の黒三角＋E */}
+                          <div style={{position:'absolute',top:0,left:0,width:'0',height:'0',borderTop:'48px solid #111',borderRight:'48px solid transparent',zIndex:2}}>
+                            <span style={{position:'absolute',top:'4px',left:'10px',color:'#fff',fontWeight:'bold',fontSize:'1.1rem',fontFamily:'monospace'}}>E</span>
+                          </div>
+                          {/* 上部 */}
+                          <div className="border-b border-gray-200 px-6 pt-6 pb-3">
+                            <div className="text-xs text-gray-500 mb-1">{formatDateOnly(espresso.created_at)}</div>
+                            <div className="flex items-end justify-between">
+                              <div className="text-2xl font-bold text-gray-900 truncate max-w-[12em]">{espresso.coffee_name}</div>
+                            </div>
+                          </div>
+                          {/* 本体 */}
+                          <div className="flex-1 flex flex-col px-6 py-4">
+                            {/* コーヒー情報 */}
+                            <div className="mb-2 text-xs">
+                              <div className="font-bold text-gray-700">産地: <span className="font-normal text-gray-900">{espresso.coffee_origin}</span></div>
+                              <div className="font-bold text-gray-700">品種: <span className="font-normal text-gray-900">{espresso.coffee_variety}</span></div>
+                              <div className="font-bold text-gray-700">精製方法: <span className="font-normal text-gray-900">{espresso.coffee_process}</span></div>
+                              <div className="font-bold text-gray-700">焙煎度: <span className="font-normal text-gray-900">{espresso.coffee_roast_level}</span></div>
+                            </div>
+                            {/* LE NEZ/LES AROMA */}
+                            <div className="space-y-1 text-xs mb-2">
+                              <div><span className="font-medium text-gray-900">LE NEZ</span> <span className="ml-2 text-gray-700">{espresso.nose_notes || '記録なし'}</span></div>
+                              <div><span className="font-medium text-gray-900">LES AROMA</span> <span className="ml-2 text-gray-700">{espresso.aroma_notes || '記録なし'}</span></div>
+                            </div>
+                            {/* クレマ（レーダーチャート） */}
+                            <div className="mb-2">
+                              <div className="font-bold text-gray-700 text-xs mb-1">クレマ</div>
+                              <div className="flex justify-center items-center">
+                                <RadarChart tasting={{
+                                  acidity: espresso.crema_color || 0,
+                                  sweetness: espresso.crema_thickness || 0,
+                                  richness: espresso.crema_persistence || 0,
+                                  body: 0, balance: 0, cleanliness: 0, aftertaste: 0
+                                }} />
+                              </div>
+                            </div>
+                            {/* 味わい（レーダーチャート） */}
+                            <div className="mb-2">
+                              <div className="font-bold text-gray-700 text-xs mb-1">味わい</div>
+                              <div className="flex justify-center items-center">
+                                <RadarChart tasting={{
+                                  acidity: espresso.tasting_acidity || 0,
+                                  sweetness: espresso.tasting_sweetness || 0,
+                                  richness: espresso.tasting_richness || 0,
+                                  body: espresso.tasting_body || 0,
+                                  balance: espresso.tasting_balance || 0,
+                                  cleanliness: espresso.tasting_cleanliness || 0,
+                                  aftertaste: espresso.tasting_aftertaste || 0
+                                }} />
+                              </div>
+                            </div>
+                            {/* コメント */}
+                            <div className="border-t border-gray-100 pt-2 mt-2 text-xs text-gray-700">
+                              <div className="font-medium text-gray-900 mb-1">コメント</div>
+                              {espresso.comments ? (
+                                <div className="whitespace-pre-wrap">{espresso.comments}</div>
+                              ) : (
+                                <div className="text-gray-500">記録なし</div>
+                              )}
+                            </div>
+                            {/* 操作ボタン */}
+                            <div className="mt-3 flex justify-end gap-2">
+                              <Link
+                                href={`/records/espresso/${espresso.id}`}
+                                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
+                              >
+                                詳細を見る →
+                              </Link>
+                              <Link
+                                href={`/records/espresso/${espresso.id}/edit`}
+                                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
+                              >
+                                編集
+                              </Link>
+                              <button
+                                type="button"
+                                className="text-xs sm:text-sm text-gray-600 hover:text-white transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-900"
+                                onClick={() => handleDelete(espresso.id)}
+                              >
+                                削除
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      {/* 本体（縦並び） */}
-                      <div className="flex-1 flex flex-col px-6 py-4">
-                        {/* 産地情報 */}
-                        <div className="mb-2">
-                          <div className="font-bold text-gray-700">産地: <span className="font-normal text-gray-900">{record.coffee?.origin}</span></div>
-                          <div className="font-bold text-gray-700">精製方式: <span className="font-normal text-gray-900">{record.coffee?.process}</span></div>
-                          <div className="font-bold text-gray-700">品種: <span className="font-normal text-gray-900">{record.coffee?.variety}</span></div>
-                        </div>
-                        {/* 抽出レシピ */}
-                        <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs leading-relaxed mb-2">
-                          <div className="font-bold text-gray-700 mb-2">抽出レシピ</div>
-                          <div className="mb-1 font-bold">ドリッパー: <span className="font-normal text-gray-900">{record.brewing?.dripper}</span></div>
-                          <div className="mb-1 font-bold">グラインダー: <span className="font-normal text-gray-900">{record.brewing?.grinder}</span></div>
-                          <div className="mb-1 font-bold">挽き目: <span className="font-normal text-gray-900">{record.brewing?.grindSize}</span></div>
-                          <div className="mb-1 font-bold">豆量: <span className="font-normal text-gray-900">{record.brewing?.coffeeAmount} g</span></div>
-                          <div className="mb-1 font-bold">湯量: <span className="font-normal text-gray-900">{record.brewing?.waterAmount} ml</span></div>
-                          <div className="mb-1 font-bold">抽出時間: <span className="font-normal text-gray-900">{record.brewing?.brewTime}</span></div>
-                          <div className="mb-1 font-bold">温度: <span className="font-normal text-gray-900">{record.brewing?.temperature}</span></div>
-                          <div className="font-bold">蒸らし: <span className="font-normal text-gray-900">{record.brewing?.bloomAmount} / {record.brewing?.bloomTime}</span></div>
-                        </div>
-                        {/* レーダーチャート */}
-                        <div className="flex justify-center items-center my-4">
-                          <RadarChart tasting={record.tasting ?? defaultTasting} />
-                        </div>
-                        {/* 香りのノート */}
-                        <div className="space-y-2 text-xs mb-2">
-                          <div>
-                            <span className="font-medium text-gray-900">LE NEZ</span>
-                            <span className="ml-2 text-gray-700">{formatAromaNotes('nose', record)}</span>
+                      );
+                    } else {
+                      // 既存のハンドドリップカード
+                      return (
+                        <div key={record.id} className="bg-white border border-gray-300 rounded-lg shadow-sm flex flex-col h-full">
+                          {/* タイトル・スコア・日付（上部） */}
+                          <div className="border-b border-gray-200 px-6 pt-6 pb-3">
+                            <div className="text-xs text-gray-500 mb-1">{formatDateOnly(record.created_at)}</div>
+                            <div className="flex items-end justify-between">
+                              <div className="text-2xl font-bold text-gray-900 truncate max-w-[12em]">{record.coffee?.name}</div>
+                              <div className="flex flex-col items-end min-w-0 ml-2">
+                                <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">{record.personalScore}<span className="text-xs font-normal text-gray-600">/100</span></div>
+                                <div className="text-xs text-gray-600 whitespace-nowrap">評価スコア: {record.tasting?.totalScore}/35</div>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-medium text-gray-900">LES ARÔMES</span>
-                            <span className="ml-2 text-gray-700">{formatAromaNotes('aroma', record)}</span>
+                          {/* 本体（縦並び） */}
+                          <div className="flex-1 flex flex-col px-6 py-4">
+                            {/* 産地情報 */}
+                            <div className="mb-2">
+                              <div className="font-bold text-gray-700">産地: <span className="font-normal text-gray-900">{record.coffee?.origin}</span></div>
+                              <div className="font-bold text-gray-700">精製方式: <span className="font-normal text-gray-900">{record.coffee?.process}</span></div>
+                              <div className="font-bold text-gray-700">品種: <span className="font-normal text-gray-900">{record.coffee?.variety}</span></div>
+                            </div>
+                            {/* 抽出レシピ */}
+                            <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs leading-relaxed mb-2">
+                              <div className="font-bold text-gray-700 mb-2">抽出レシピ</div>
+                              <div className="mb-1 font-bold">ドリッパー: <span className="font-normal text-gray-900">{record.brewing?.dripper}</span></div>
+                              <div className="mb-1 font-bold">グラインダー: <span className="font-normal text-gray-900">{record.brewing?.grinder}</span></div>
+                              <div className="mb-1 font-bold">挽き目: <span className="font-normal text-gray-900">{record.brewing?.grindSize}</span></div>
+                              <div className="mb-1 font-bold">豆量: <span className="font-normal text-gray-900">{record.brewing?.coffeeAmount} g</span></div>
+                              <div className="mb-1 font-bold">湯量: <span className="font-normal text-gray-900">{record.brewing?.waterAmount} ml</span></div>
+                              <div className="mb-1 font-bold">抽出時間: <span className="font-normal text-gray-900">{record.brewing?.brewTime}</span></div>
+                              <div className="mb-1 font-bold">温度: <span className="font-normal text-gray-900">{record.brewing?.temperature}</span></div>
+                              <div className="font-bold">蒸らし: <span className="font-normal text-gray-900">{record.brewing?.bloomAmount} / {record.brewing?.bloomTime}</span></div>
+                            </div>
+                            {/* レーダーチャート */}
+                            <div className="flex justify-center items-center my-4">
+                              <RadarChart tasting={record.tasting ?? defaultTasting} />
+                            </div>
+                            {/* 香りのノート */}
+                            <div className="space-y-2 text-xs mb-2">
+                              <div>
+                                <span className="font-medium text-gray-900">LE NEZ</span>
+                                <span className="ml-2 text-gray-700">{formatAromaNotes('nose', record)}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-900">LES ARÔMES</span>
+                                <span className="ml-2 text-gray-700">{formatAromaNotes('aroma', record)}</span>
+                              </div>
+                            </div>
+                            {/* コメント */}
+                            <div className="border-t border-gray-100 pt-2 mt-2 text-xs text-gray-700">
+                              <div className="font-medium text-gray-900 mb-1">総合評価</div>
+                              {record.comments ? (
+                                <div className="whitespace-pre-wrap">{record.comments}</div>
+                              ) : (
+                                <div className="text-gray-500">記録なし</div>
+                              )}
+                            </div>
+                            {/* 操作ボタン */}
+                            <div className="mt-3 flex justify-end gap-2">
+                              <Link
+                                href={`/records/${record.id}`}
+                                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
+                              >
+                                詳細を見る →
+                              </Link>
+                              <Link
+                                href={`/records/${record.id}/edit`}
+                                className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
+                              >
+                                編集
+                              </Link>
+                              <button
+                                type="button"
+                                className="text-xs sm:text-sm text-gray-600 hover:text-white transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-900"
+                                onClick={() => handleDelete(record.id)}
+                              >
+                                削除
+                              </button>
+                            </div>
                           </div>
                         </div>
-                        {/* コメント */}
-                        <div className="border-t border-gray-100 pt-2 mt-2 text-xs text-gray-700">
-                          <div className="font-medium text-gray-900 mb-1">総合評価</div>
-                          {record.comments ? (
-                            <div className="whitespace-pre-wrap">{record.comments}</div>
-                          ) : (
-                            <div className="text-gray-500">記録なし</div>
-                          )}
-                        </div>
-                        {/* 操作ボタン */}
-                        <div className="mt-3 flex justify-end gap-2">
-                          <Link
-                            href={`/records/${record.id}`}
-                            className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
-                          >
-                            詳細を見る →
-                          </Link>
-                          <Link
-                            href={`/records/${record.id}/edit`}
-                            className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-100"
-                          >
-                            編集
-                          </Link>
-                          <button
-                            type="button"
-                            className="text-xs sm:text-sm text-gray-600 hover:text-white transition-colors border border-gray-400 rounded px-2 py-1 bg-white hover:bg-gray-900"
-                            onClick={() => handleDelete(record.id)}
-                          >
-                            削除
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    }
+                  })}
                 </div>
               )}
             </>

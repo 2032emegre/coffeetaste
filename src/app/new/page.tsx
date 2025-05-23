@@ -184,6 +184,67 @@ export default function NewRecord() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      if (recordType === 'espresso') {
+        // エスプレッソ用データ整形
+        const espressoData: any = {
+          environment_date: formData.environment.date,
+          environment_time: formData.environment.time,
+          environment_weather: formData.environment.weather,
+          environment_temperature: formData.environment.temperature,
+          environment_humidity: formData.environment.humidity,
+          environment_is_auto_fetched: formData.environment.isAutoFetched,
+          coffee_name: formData.coffee.name,
+          coffee_origin: formData.coffee.origin,
+          coffee_process: formData.coffee.process,
+          coffee_variety: formData.coffee.variety,
+          coffee_roast_level: formData.coffee.roastLevel,
+          coffee_roasted_at: formData.coffee.roastedAt,
+          coffee_roast_date: formData.coffee.roastDate,
+          coffee_other_info: formData.coffee.otherInfo,
+          brewing_type: formData.brewing.dripper || '',
+          brewing_type_other: '',
+          brewing_grinder: formData.brewing.grinder || '',
+          brewing_grind_setting: formData.brewing.grindSetting || '',
+          brewing_coffee_amount: formData.brewing.coffeeAmount ? Number(formData.brewing.coffeeAmount) : null,
+          brewing_yield: null,
+          brewing_brew_time: formData.brewing.brewTime || '',
+          brewing_temperature: formData.brewing.temperature ? Number(formData.brewing.temperature) : null,
+          brewing_pressure: null,
+          brewing_notes: formData.brewing.notes || '',
+          crema_color: cremaScores.color,
+          crema_thickness: cremaScores.thickness,
+          crema_persistence: cremaScores.persistence,
+          crema_notes: '',
+          tasting_acidity: tastingScores.acidity,
+          tasting_sweetness: tastingScores.sweetness,
+          tasting_richness: 0,
+          tasting_body: tastingScores.body,
+          tasting_balance: tastingScores.balance,
+          tasting_cleanliness: 0,
+          tasting_aftertaste: tastingScores.aftertaste,
+          tasting_total_score: totalScore,
+          nose_positive: formData.nose.positive,
+          nose_negative: formData.nose.negative,
+          nose_notes: formData.nose.notes,
+          aroma_positive: formData.aroma.positive,
+          aroma_negative: formData.aroma.negative,
+          aroma_notes: formData.aroma.notes,
+          personal_score: formData.personalScore,
+          comments: formData.comments,
+          notes: formData.notes,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        const { error } = await supabase
+          .from('espresso_records')
+          .insert([espressoData]);
+        if (error) throw error;
+        setShowSuccess(true);
+        setTimeout(() => {
+          router.push('/records/espresso');
+        }, 1500);
+        return;
+      }
       // idを除外してinsertする
       const { id, ...insertData } = formData;
       const { data, error } = await supabase
