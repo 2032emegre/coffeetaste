@@ -39,16 +39,6 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const debouncedCoffeeName = useDebounce(formData.coffee.name, 500);
 
-  // datetime-local用の値変換
-  const toDatetimeLocal = (date: Date | string | null) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    if (isNaN(d.getTime())) return '';
-    const offset = d.getTimezoneOffset();
-    const local = new Date(d.getTime() - offset * 60000);
-    return local.toISOString().slice(0, 16);
-  };
-
   const handleChange = (key: keyof TastingRecord, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
@@ -56,8 +46,8 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
-    if (!formData.brewed_at || !formData.coffee.name) {
-      setLocalError('日付とコーヒー名は必須です');
+    if (!formData.environment.date || !formData.environment.time || !formData.coffee.name) {
+      setLocalError("日付、時刻、コーヒー名は必須です");
       return;
     }
     await onSubmit(formData);
@@ -142,12 +132,16 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* --- 環境情報 --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">環境情報</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">抽出日時</label>
-            <input type="datetime-local" value={toDatetimeLocal(formData.brewed_at)} onChange={e => handleChange('brewed_at', new Date(e.target.value))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" required />
+            <label className="block text-sm font-medium text-gray-700 mb-1">日付</label>
+            <input type="date" value={formData.environment.date} onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, date: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">時刻</label>
+            <input type="time" value={formData.environment.time} onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, time: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" required />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">天気</label>
@@ -161,7 +155,7 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {/* --- コーヒー情報 --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">コーヒー情報</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative">
@@ -200,7 +194,7 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {/* --- 抽出レシピ --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">抽出レシピ</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -253,23 +247,48 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {/* --- テイスティング評価 --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900">テイスティング評価</h2>
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">テイスティング評価</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {TASTING_KEYS.map((key) => (
-            <div key={key} className="flex items-center space-x-4">
-              <label className="block text-sm font-medium text-gray-700 w-20">
-                {key === 'acidity' ? '酸味' : key === 'sweetness' ? '甘味' : key === 'richness' ? '濃厚さ' : key === 'body' ? 'ボディ' : key === 'balance' ? 'バランス' : key === 'cleanliness' ? 'クリーン度' : '余韻'}
-              </label>
-              <input type="range" min={0} max={5} step={1} value={formData.tasting[key]} onChange={e => setFormData(prev => ({ ...prev, tasting: { ...prev.tasting, [key]: Number(e.target.value) } }))} className="flex-1" />
-              <span className="w-6 text-center">{formData.tasting[key]}</span>
+          {[
+            { key: 'acidity', label: '酸味' },
+            { key: 'sweetness', label: '甘味' },
+            { key: 'richness', label: '濃厚さ' },
+            { key: 'body', label: 'ボディ' },
+            { key: 'balance', label: 'バランス' },
+            { key: 'cleanliness', label: 'クリーン度' },
+            { key: 'aftertaste', label: '余韻' },
+          ].map(({ key, label }) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+              <div className="flex items-center space-x-2">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      tasting: {
+                        ...prev.tasting,
+                        [key]: value,
+                        totalScore: (key === 'acidity' || key === 'sweetness' || key === 'richness' || key === 'body' || key === 'balance' || key === 'cleanliness' || key === 'aftertaste')
+                          ? prev.tasting.acidity + prev.tasting.sweetness + prev.tasting.richness + prev.tasting.body + prev.tasting.balance + prev.tasting.cleanliness + prev.tasting.aftertaste - prev.tasting[key as keyof typeof prev.tasting] + value
+                          : prev.tasting.totalScore
+                      }
+                    }))}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${formData.tasting[key as keyof typeof formData.tasting] === value ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* --- LE NEZ --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">LE NEZ</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -300,7 +319,7 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {/* --- LES ARÔMES --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">LES ARÔMES</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -331,7 +350,7 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {/* --- 総合評価 --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
         <h2 className="text-xl font-semibold text-gray-900">総合評価</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div>
@@ -345,7 +364,7 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">コメント・気付き・改善点・比較</label>
-          <textarea value={formData.comment ?? ''} onChange={e => setFormData(prev => ({ ...prev, comment: e.target.value }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={3} />
+          <textarea value={formData.comments ?? ''} onChange={e => setFormData(prev => ({ ...prev, comments: e.target.value }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={3} />
         </div>
       </section>
 

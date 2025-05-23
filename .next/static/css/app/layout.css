@@ -719,6 +719,9 @@ video {
 .h-4 {
   height: 1rem;
 }
+.h-48 {
+  height: 12rem;
+}
 .h-5 {
   height: 1.25rem;
 }
@@ -931,6 +934,9 @@ video {
 }
 .overflow-auto {
   overflow: auto;
+}
+.overflow-hidden {
+  overflow: hidden;
 }
 .overflow-y-auto {
   overflow-y: auto;
@@ -1404,6 +1410,11 @@ body {
 .focus\:ring-gray-500:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(107 114 128 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-red-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(239 68 68 / var(--tw-ring-opacity, 1));
 }
 
 .focus\:ring-offset-2:focus {
