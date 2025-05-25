@@ -177,6 +177,12 @@ const HanddripCard: React.FC<Props> = ({ record, onEdit, onDelete, onDetail }) =
           <ReactECharts option={radarOption} style={{ height: '100%' }} />
         </div>
 
+        {/* 総合評価 */}
+        <div className="mb-2">
+          <div className="font-semibold text-gray-700 mb-1">総合評価</div>
+          <div className="text-base text-gray-900 font-bold">{displayValue(record.comments)}</div>
+        </div>
+
         {/* アクションボタン */}
         <div className="flex justify-end space-x-2 mt-auto pt-4 border-t">
           <button
