@@ -19,6 +19,7 @@ export interface TastingRecord {
         roastLevel?: string;
         roastedAt?: Date;
         roastDate?: string;
+        altitude?: number;         // 標高（メートル）
         otherInfo?: string;
     };
     brewing: {

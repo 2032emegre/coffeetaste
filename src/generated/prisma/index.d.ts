@@ -884,11 +884,13 @@ export namespace Prisma {
   export type TastingRecordAvgAggregateOutputType = {
     id: number | null
     score: number | null
+    altitude: number | null
   }
 
   export type TastingRecordSumAggregateOutputType = {
     id: number | null
     score: number | null
+    altitude: number | null
   }
 
   export type TastingRecordMinAggregateOutputType = {
@@ -896,6 +898,7 @@ export namespace Prisma {
     coffeeName: string | null
     score: number | null
     notes: string | null
+    altitude: number | null
     createdAt: Date | null
   }
 
@@ -904,6 +907,7 @@ export namespace Prisma {
     coffeeName: string | null
     score: number | null
     notes: string | null
+    altitude: number | null
     createdAt: Date | null
   }
 
@@ -912,6 +916,7 @@ export namespace Prisma {
     coffeeName: number
     score: number
     notes: number
+    altitude: number
     createdAt: number
     _all: number
   }
@@ -920,11 +925,13 @@ export namespace Prisma {
   export type TastingRecordAvgAggregateInputType = {
     id?: true
     score?: true
+    altitude?: true
   }
 
   export type TastingRecordSumAggregateInputType = {
     id?: true
     score?: true
+    altitude?: true
   }
 
   export type TastingRecordMinAggregateInputType = {
@@ -932,6 +939,7 @@ export namespace Prisma {
     coffeeName?: true
     score?: true
     notes?: true
+    altitude?: true
     createdAt?: true
   }
 
@@ -940,6 +948,7 @@ export namespace Prisma {
     coffeeName?: true
     score?: true
     notes?: true
+    altitude?: true
     createdAt?: true
   }
 
@@ -948,6 +957,7 @@ export namespace Prisma {
     coffeeName?: true
     score?: true
     notes?: true
+    altitude?: true
     createdAt?: true
     _all?: true
   }
@@ -1043,6 +1053,7 @@ export namespace Prisma {
     coffeeName: string
     score: number
     notes: string | null
+    altitude: number | null
     createdAt: Date
     _count: TastingRecordCountAggregateOutputType | null
     _avg: TastingRecordAvgAggregateOutputType | null
@@ -1070,6 +1081,7 @@ export namespace Prisma {
     coffeeName?: boolean
     score?: boolean
     notes?: boolean
+    altitude?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["tastingRecord"]>
 
@@ -1078,6 +1090,7 @@ export namespace Prisma {
     coffeeName?: boolean
     score?: boolean
     notes?: boolean
+    altitude?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["tastingRecord"]>
 
@@ -1086,6 +1099,7 @@ export namespace Prisma {
     coffeeName?: boolean
     score?: boolean
     notes?: boolean
+    altitude?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["tastingRecord"]>
 
@@ -1094,10 +1108,11 @@ export namespace Prisma {
     coffeeName?: boolean
     score?: boolean
     notes?: boolean
+    altitude?: boolean
     createdAt?: boolean
   }
 
-  export type TastingRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "coffeeName" | "score" | "notes" | "createdAt", ExtArgs["result"]["tastingRecord"]>
+  export type TastingRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "coffeeName" | "score" | "notes" | "altitude" | "createdAt", ExtArgs["result"]["tastingRecord"]>
 
   export type $TastingRecordPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TastingRecord"
@@ -1107,6 +1122,7 @@ export namespace Prisma {
       coffeeName: string
       score: number
       notes: string | null
+      altitude: number | null
       createdAt: Date
     }, ExtArgs["result"]["tastingRecord"]>
     composites: {}
@@ -1535,6 +1551,7 @@ export namespace Prisma {
     readonly coffeeName: FieldRef<"TastingRecord", 'String'>
     readonly score: FieldRef<"TastingRecord", 'Int'>
     readonly notes: FieldRef<"TastingRecord", 'String'>
+    readonly altitude: FieldRef<"TastingRecord", 'Int'>
     readonly createdAt: FieldRef<"TastingRecord", 'DateTime'>
   }
     
@@ -1921,6 +1938,7 @@ export namespace Prisma {
     coffeeName: 'coffeeName',
     score: 'score',
     notes: 'notes',
+    altitude: 'altitude',
     createdAt: 'createdAt'
   };
 
@@ -2023,6 +2041,7 @@ export namespace Prisma {
     coffeeName?: StringFilter<"TastingRecord"> | string
     score?: IntFilter<"TastingRecord"> | number
     notes?: StringNullableFilter<"TastingRecord"> | string | null
+    altitude?: IntNullableFilter<"TastingRecord"> | number | null
     createdAt?: DateTimeFilter<"TastingRecord"> | Date | string
   }
 
@@ -2031,6 +2050,7 @@ export namespace Prisma {
     coffeeName?: SortOrder
     score?: SortOrder
     notes?: SortOrderInput | SortOrder
+    altitude?: SortOrderInput | SortOrder
     createdAt?: SortOrder
   }
 
@@ -2042,6 +2062,7 @@ export namespace Prisma {
     coffeeName?: StringFilter<"TastingRecord"> | string
     score?: IntFilter<"TastingRecord"> | number
     notes?: StringNullableFilter<"TastingRecord"> | string | null
+    altitude?: IntNullableFilter<"TastingRecord"> | number | null
     createdAt?: DateTimeFilter<"TastingRecord"> | Date | string
   }, "id">
 
@@ -2050,6 +2071,7 @@ export namespace Prisma {
     coffeeName?: SortOrder
     score?: SortOrder
     notes?: SortOrderInput | SortOrder
+    altitude?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: TastingRecordCountOrderByAggregateInput
     _avg?: TastingRecordAvgOrderByAggregateInput
@@ -2066,6 +2088,7 @@ export namespace Prisma {
     coffeeName?: StringWithAggregatesFilter<"TastingRecord"> | string
     score?: IntWithAggregatesFilter<"TastingRecord"> | number
     notes?: StringNullableWithAggregatesFilter<"TastingRecord"> | string | null
+    altitude?: IntNullableWithAggregatesFilter<"TastingRecord"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"TastingRecord"> | Date | string
   }
 
@@ -2073,6 +2096,7 @@ export namespace Prisma {
     coffeeName: string
     score: number
     notes?: string | null
+    altitude?: number | null
     createdAt?: Date | string
   }
 
@@ -2081,6 +2105,7 @@ export namespace Prisma {
     coffeeName: string
     score: number
     notes?: string | null
+    altitude?: number | null
     createdAt?: Date | string
   }
 
@@ -2088,6 +2113,7 @@ export namespace Prisma {
     coffeeName?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    altitude?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2096,6 +2122,7 @@ export namespace Prisma {
     coffeeName?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    altitude?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2104,6 +2131,7 @@ export namespace Prisma {
     coffeeName: string
     score: number
     notes?: string | null
+    altitude?: number | null
     createdAt?: Date | string
   }
 
@@ -2111,6 +2139,7 @@ export namespace Prisma {
     coffeeName?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    altitude?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2119,6 +2148,7 @@ export namespace Prisma {
     coffeeName?: StringFieldUpdateOperationsInput | string
     score?: IntFieldUpdateOperationsInput | number
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    altitude?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2163,6 +2193,17 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -2184,12 +2225,14 @@ export namespace Prisma {
     coffeeName?: SortOrder
     score?: SortOrder
     notes?: SortOrder
+    altitude?: SortOrder
     createdAt?: SortOrder
   }
 
   export type TastingRecordAvgOrderByAggregateInput = {
     id?: SortOrder
     score?: SortOrder
+    altitude?: SortOrder
   }
 
   export type TastingRecordMaxOrderByAggregateInput = {
@@ -2197,6 +2240,7 @@ export namespace Prisma {
     coffeeName?: SortOrder
     score?: SortOrder
     notes?: SortOrder
+    altitude?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -2205,12 +2249,14 @@ export namespace Prisma {
     coffeeName?: SortOrder
     score?: SortOrder
     notes?: SortOrder
+    altitude?: SortOrder
     createdAt?: SortOrder
   }
 
   export type TastingRecordSumOrderByAggregateInput = {
     id?: SortOrder
     score?: SortOrder
+    altitude?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -2265,6 +2311,22 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -2293,6 +2355,14 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -2336,6 +2406,17 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -2410,7 +2491,7 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -2418,7 +2499,23 @@ export namespace Prisma {
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {

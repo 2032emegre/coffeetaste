@@ -169,6 +169,16 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
             {showOriginSuggestions && originSuggestions.length > 0 && (<div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">{originSuggestions.map((suggestion, index) => (<div key={index} className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm" onMouseDown={() => handleOriginSelect(suggestion)}>{suggestion}</div>))}</div>)}
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">標高（m）</label>
+            <input
+              type="number"
+              value={formData.coffee.altitude ?? ''}
+              onChange={e => setFormData(prev => ({ ...prev, coffee: { ...prev.coffee, altitude: e.target.value === '' ? undefined : Number(e.target.value) } }))}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              placeholder="例: 1500"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">精製方式</label>
             <select value={formData.coffee.process ?? ''} onChange={e => setFormData(prev => ({ ...prev, coffee: { ...prev.coffee, process: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500">
               <option value="">選択してください</option>

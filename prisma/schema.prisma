@@ -13,5 +13,6 @@ model TastingRecord {
   coffeeName String
   score      Int
   notes      String?
+  altitude   Int?     // 標高（メートル）
   createdAt  DateTime @default(now())
 }

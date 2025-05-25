@@ -70,6 +70,7 @@ type CoffeeHistory = {
   roastDate: string;
   otherInfo: string;
   count: number;
+  altitude?: number;
 };
 
 export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeInfoProps) {
@@ -114,6 +115,7 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
           roastDate: coffee.roastDate || '',
           otherInfo: coffee.otherInfo || '',
           count: 1,
+          altitude: coffee.altitude,
         });
       }
     });
@@ -168,6 +170,9 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
     onChange('roastLevel', history.roastLevel);
     onChange('roastDate', history.roastDate);
     onChange('otherInfo', history.otherInfo);
+    if (history.altitude !== undefined) {
+      onChange('altitude', history.altitude);
+    }
     setShowHistory(false);
   };
 
@@ -258,11 +263,11 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
             ) : (
               <input
                 type="text"
-                value={formData.coffee.origin}
-                onChange={(e) => handleOriginInput(e.target.value)}
+                value={formData.coffee.origin || ''}
+                onChange={e => handleOriginInput(e.target.value)}
                 onFocus={() => setShowOriginSuggestions(true)}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                placeholder="産地を入力"
+                placeholder="例: エチオピア"
               />
             )}
             {/* 産地サジェスト */}
@@ -284,6 +289,24 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
               </div>
             )}
           </div>
+        </div>
+
+        {/* 標高 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            標高（m）
+          </label>
+          {isViewMode ? (
+            <div className="text-gray-900">{formData.coffee.altitude ?? ''}</div>
+          ) : (
+            <input
+              type="number"
+              value={formData.coffee.altitude ?? ''}
+              onChange={e => onChange('altitude', e.target.value === '' ? undefined : Number(e.target.value))}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              placeholder="例: 1500"
+            />
+          )}
         </div>
 
         {/* 精製方式 */}

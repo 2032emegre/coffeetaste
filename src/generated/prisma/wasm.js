@@ -125,6 +125,7 @@ exports.Prisma.TastingRecordScalarFieldEnum = {
   coffeeName: 'coffeeName',
   score: 'score',
   notes: 'notes',
+  altitude: 'altitude',
   createdAt: 'createdAt'
 };
 
