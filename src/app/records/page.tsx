@@ -587,7 +587,20 @@ export default function RecordList() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                   {sortedRecords.map((record) => {
                     if (recordType === 'espresso') {
-                      return <EspressoCard key={record.id} record={record} />;
+                      return (
+                        <EspressoCard
+                          key={record.id}
+                          record={record}
+                          onDetail={(id) => router.push(`/records/espresso/${id}`)}
+                          onEdit={(id) => router.push(`/records/espresso/${id}/edit`)}
+                          onDelete={(id) => {
+                            if (window.confirm('本当に削除しますか？')) {
+                              // 削除処理をここに実装（現状はダミー）
+                              setRecords(records.filter(r => r.id !== id));
+                            }
+                          }}
+                        />
+                      );
                     } else if (recordType === 'roast') {
                       return <RoastCard key={record.id} record={record} />;
                     } else if (recordType === 'shop') {

@@ -108,4 +108,71 @@ export type ShopVisitRecord = {
   comments?: string;
   staffInfo?: string;
   created_at?: string;
+};
+
+export type EspressoRecord = {
+  id: string;
+  environment: {
+    date: string;
+    time: string;
+    weather: string;
+    temperature: number | null;
+    humidity?: string;
+    isAutoFetched: boolean;
+  };
+  coffee: {
+    name: string;
+    origin?: string;
+    process?: string;
+    variety?: string;
+    roastLevel?: string;
+    roastedAt?: Date;
+    roastDate?: string;
+    otherInfo?: string;
+  };
+  brewing: {
+    type: string;
+    typeOther?: string;
+    grinder?: string;
+    grindSetting?: string;
+    coffeeAmount?: string;
+    yield?: string;
+    brewTime?: string;
+    temperature?: string;
+    pressure?: string;
+    notes?: string;
+    dripper: string;
+    flair?: boolean;
+    flairMemo?: string;
+  };
+  crema: {
+    color: number;
+    thickness: number;
+    persistence: number;
+    notes?: string;
+  };
+  tasting: {
+    acidity: number;
+    sweetness: number;
+    richness: number;
+    body: number;
+    balance: number;
+    cleanliness: number;
+    aftertaste: number;
+    totalScore: number;
+  };
+  nose: {
+    positive: { [key: string]: boolean | string };
+    negative: { [key: string]: boolean | string };
+    notes: string;
+  };
+  aroma: {
+    positive: { [key: string]: boolean | string };
+    negative: { [key: string]: boolean | string };
+    notes: string;
+  };
+  personalScore: number;
+  comments: string;
+  notes?: string;
+  created_at?: string;
 }; 

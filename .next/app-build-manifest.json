@@ -1,15 +1,15 @@
 {
   "pages": {
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
     ],
     "/new/page": [
       "static/chunks/webpack.js",
@@ -21,20 +21,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/records/page.js"
     ],
-    "/handdrip/[id]/edit/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/handdrip/[id]/edit/page.js"
-    ],
     "/handdrip/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/handdrip/[id]/page.js"
     ],
-    "/not-found": [
+    "/handdrip/[id]/edit/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/not-found.js"
+      "static/chunks/app/handdrip/[id]/edit/page.js"
+    ],
+    "/records/espresso/[id]/edit/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/records/espresso/[id]/edit/page.js"
+    ],
+    "/records/espresso/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/records/espresso/[id]/page.js"
     ]
   }
 }

@@ -1,8 +1,9 @@
 {
-  "/not-found": "app/not-found.js",
-  "/new/page": "app/new/page.js",
-  "/records/page": "app/records/page.js",
-  "/handdrip/[id]/edit/page": "app/handdrip/[id]/edit/page.js",
+  "/records/espresso/[id]/page": "app/records/espresso/[id]/page.js",
+  "/records/espresso/[id]/edit/page": "app/records/espresso/[id]/edit/page.js",
+  "/api/coffee-history/route": "app/api/coffee-history/route.js",
   "/handdrip/[id]/page": "app/handdrip/[id]/page.js",
-  "/api/coffee-history/route": "app/api/coffee-history/route.js"
+  "/records/page": "app/records/page.js",
+  "/new/page": "app/new/page.js",
+  "/handdrip/[id]/edit/page": "app/handdrip/[id]/edit/page.js"
 }
