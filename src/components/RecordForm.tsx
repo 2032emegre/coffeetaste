@@ -389,13 +389,15 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
 
       {(localError || error) && <div className="text-red-500 text-sm">{localError || error}</div>}
       {mode !== 'view' && (
-        <button 
-          type="submit" 
-          className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" 
-          disabled={loading}
-        >
-          {loading ? '保存中...' : mode === 'edit' ? '更新' : '保存'}
-        </button>
+        <div className="flex justify-end mt-8">
+          <button 
+            type="submit" 
+            className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+            disabled={loading}
+          >
+            {loading ? '保存中...' : mode === 'edit' ? '更新' : '記録を保存'}
+          </button>
+        </div>
       )}
     </form>
   );

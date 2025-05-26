@@ -32,15 +32,15 @@ type Tasting = {
   cleanliness: number;
   aftertaste: number;
   totalScore: number;
-  aromaPowder?: number;
-  aromaPowderNote?: string;
-  aromaLiquid?: number;
-  aromaLiquidNote?: string;
-  flavor?: number;
-  flavorNote?: string;
-  strength?: number;
-  uniformity?: number;
-  cleanness?: number;
+  aromaPowder: number;
+  aromaPowderNote: string;
+  aromaLiquid: number;
+  aromaLiquidNote: string;
+  flavor: number;
+  flavorNote: string;
+  strength: number;
+  uniformity: number;
+  cleanness: number;
 };
 type Overall = {
   totalScore: number;
@@ -54,9 +54,10 @@ type RoastingRecordFormProps = {
   onSubmit?: (data: TastingRecord & { roastBefore: RoastBefore; roastAfter: RoastAfter; tasting: Tasting; overall: Overall }) => void;
   loading?: boolean;
   error?: string | null;
+  mode?: 'view' | 'edit' | 'new';
 };
 
-export default function RoastingRecordForm({ initialData, onSubmit, loading, error }: RoastingRecordFormProps) {
+export default function RoastingRecordForm({ initialData, onSubmit, loading, error, mode = 'edit' }: RoastingRecordFormProps) {
   const today = new Date();
   const defaultDate = today.toISOString().split('T')[0];
   const defaultTime = today.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -159,6 +160,15 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
     cleanliness: 0,
     aftertaste: 0,
     totalScore: 0,
+    aromaPowder: 0,
+    aromaPowderNote: '',
+    aromaLiquid: 0,
+    aromaLiquidNote: '',
+    flavor: 0,
+    flavorNote: '',
+    strength: 0,
+    uniformity: 0,
+    cleanness: 0,
   });
   const [aromaPowder, setAromaPowder] = useState(0);
   const [aromaPowderNote, setAromaPowderNote] = useState('');
@@ -234,9 +244,9 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* 環境情報セクション */}
-      <EnvironmentInfo formData={form} onChange={handleEnvironmentChange} mode="new" />
+      <EnvironmentInfo formData={form} onChange={handleEnvironmentChange} mode={mode} />
       {/* コーヒー情報セクション */}
-      <CoffeeInfo formData={form} onChange={handleCoffeeChange} mode="new" />
+      <CoffeeInfo formData={form} onChange={handleCoffeeChange} mode={mode} />
 
       {/* --- 焙煎前セクション --- */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -244,15 +254,15 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">投入量 (g)</label>
-            <input type="number" value={roastBefore.chargeWeight} onChange={e => handleRoastBeforeChange('chargeWeight', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastBefore.chargeWeight} onChange={e => handleRoastBeforeChange('chargeWeight', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">投入温度 (℃)</label>
-            <input type="number" value={roastBefore.chargeTemp} onChange={e => handleRoastBeforeChange('chargeTemp', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastBefore.chargeTemp} onChange={e => handleRoastBeforeChange('chargeTemp', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">目標焙煎度</label>
-            <input type="text" value={roastBefore.targetRoastLevel} onChange={e => handleRoastBeforeChange('targetRoastLevel', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="text" value={roastBefore.targetRoastLevel} onChange={e => handleRoastBeforeChange('targetRoastLevel', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
         </div>
       </section>
@@ -263,47 +273,47 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">投入時間 (秒)</label>
-            <input type="number" value={roastAfter.chargeTime} onChange={e => handleRoastAfterChange('chargeTime', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.chargeTime} onChange={e => handleRoastAfterChange('chargeTime', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">ドライエンド (秒)</label>
-            <input type="number" value={roastAfter.dryEnd} onChange={e => handleRoastAfterChange('dryEnd', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.dryEnd} onChange={e => handleRoastAfterChange('dryEnd', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">イエローフェーズスタート (秒)</label>
-            <input type="number" value={roastAfter.yellowStart} onChange={e => handleRoastAfterChange('yellowStart', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.yellowStart} onChange={e => handleRoastAfterChange('yellowStart', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">メイラードフェーズスタート (秒)</label>
-            <input type="number" value={roastAfter.maillardStart} onChange={e => handleRoastAfterChange('maillardStart', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.maillardStart} onChange={e => handleRoastAfterChange('maillardStart', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">1ハゼ時間 (秒)</label>
-            <input type="number" value={roastAfter.firstCrack} onChange={e => handleRoastAfterChange('firstCrack', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.firstCrack} onChange={e => handleRoastAfterChange('firstCrack', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">1ハゼピーク (秒)</label>
-            <input type="number" value={roastAfter.firstCrackPeak} onChange={e => handleRoastAfterChange('firstCrackPeak', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.firstCrackPeak} onChange={e => handleRoastAfterChange('firstCrackPeak', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">2ハゼ時間 (秒)</label>
-            <input type="number" value={roastAfter.secondCrack} onChange={e => handleRoastAfterChange('secondCrack', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.secondCrack} onChange={e => handleRoastAfterChange('secondCrack', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">排出時間 (秒)</label>
-            <input type="number" value={roastAfter.dropTime} onChange={e => handleRoastAfterChange('dropTime', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.dropTime} onChange={e => handleRoastAfterChange('dropTime', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">総合時間 (秒)</label>
-            <input type="number" value={roastAfter.totalTime} onChange={e => handleRoastAfterChange('totalTime', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.totalTime} onChange={e => handleRoastAfterChange('totalTime', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">排出温度 (℃)</label>
-            <input type="number" value={roastAfter.dropTemp} onChange={e => handleRoastAfterChange('dropTemp', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.dropTemp} onChange={e => handleRoastAfterChange('dropTemp', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">焙煎後重量 (g)</label>
-            <input type="number" value={roastAfter.afterWeight} onChange={e => handleRoastAfterChange('afterWeight', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input type="number" value={roastAfter.afterWeight} onChange={e => handleRoastAfterChange('afterWeight', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" readOnly={mode === 'view'} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">焙煎原料率 (%)</label>
@@ -324,6 +334,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                 onChange={e => handleRoastAfterChange('color', Number(e.target.value))}
                 className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 style={{ accentColor: '#111' }}
+                readOnly={mode === 'view'}
               />
               <span className="text-2xl font-bold text-gray-900 w-12 text-right">{roastAfter.color}</span>
             </div>
@@ -345,12 +356,13 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => setAromaPowder(v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${aromaPowder === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
               ))}
             </div>
-            <textarea value={aromaPowderNote} onChange={e => setAromaPowderNote(e.target.value)} className="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={1} placeholder="ノート" />
+            <textarea value={aromaPowderNote} onChange={e => setAromaPowderNote(e.target.value)} className="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={1} placeholder="ノート" readOnly={mode === 'view'} />
           </div>
           {/* 香り（液） */}
           <div>
@@ -362,12 +374,13 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => setAromaLiquid(v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${aromaLiquid === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
               ))}
             </div>
-            <textarea value={aromaLiquidNote} onChange={e => setAromaLiquidNote(e.target.value)} className="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={1} placeholder="ノート" />
+            <textarea value={aromaLiquidNote} onChange={e => setAromaLiquidNote(e.target.value)} className="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={1} placeholder="ノート" readOnly={mode === 'view'} />
           </div>
           {/* 風味 */}
           <div>
@@ -379,12 +392,13 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => setFlavor(v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${flavor === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
               ))}
             </div>
-            <textarea value={flavorNote} onChange={e => setFlavorNote(e.target.value)} className="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={1} placeholder="ノート" />
+            <textarea value={flavorNote} onChange={e => setFlavorNote(e.target.value)} className="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={1} placeholder="ノート" readOnly={mode === 'view'} />
           </div>
           {/* 余韻 */}
           <div>
@@ -396,6 +410,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => handleTastingChange('aftertaste', v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${tasting.aftertaste === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -412,6 +427,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => handleTastingChange('acidity', v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${tasting.acidity === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -428,6 +444,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => handleTastingChange('strength', v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${tasting.strength === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -444,6 +461,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => handleTastingChange('body', v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${tasting.body === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -460,6 +478,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => setUniformity(v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${uniformity === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -476,6 +495,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => handleTastingChange('balance', v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${tasting.balance === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -492,6 +512,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => setCleanness(v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${cleanness === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -508,6 +529,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                   type="button"
                   onClick={() => handleTastingChange('sweetness', v)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${tasting.sweetness === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
+                  disabled={mode === 'view'}
                 >
                   {v}
                 </button>
@@ -537,6 +559,7 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                 onChange={e => handleOverallChange('personalScore', Number(e.target.value))}
                 className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 style={{ accentColor: '#111' }}
+                disabled={mode === 'view'}
               />
               <input
                 type="number"
@@ -545,25 +568,34 @@ export default function RoastingRecordForm({ initialData, onSubmit, loading, err
                 value={overall.personalScore}
                 onChange={e => handleOverallChange('personalScore', Number(e.target.value))}
                 className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
+                disabled={mode === 'view'}
               />
               <span className="text-2xl font-bold text-gray-900 w-16 text-right">{overall.personalScore}</span>
             </div>
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">問題点・改善点</label>
-            <textarea value={overall.issues} onChange={e => handleOverallChange('issues', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={2} />
+            <textarea value={overall.issues} onChange={e => handleOverallChange('issues', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={2} disabled={mode === 'view'} />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">総合</label>
-            <textarea value={overall.summary} onChange={e => handleOverallChange('summary', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={2} />
+            <textarea value={overall.summary} onChange={e => handleOverallChange('summary', e.target.value)} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={2} disabled={mode === 'view'} />
           </div>
         </div>
       </section>
 
       {error && <div className="text-red-500 text-sm">{error}</div>}
-      <button type="submit" className="w-full py-2 bg-gray-900 text-white rounded hover:bg-gray-700" disabled={loading}>
-        {loading ? "保存中..." : "保存"}
-      </button>
+      {(mode === 'edit' || mode === 'new') && (
+        <div className="flex justify-end mt-6">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? '保存中...' : mode === 'edit' ? '更新' : '記録を保存'}
+          </button>
+        </div>
+      )}
     </form>
   );
 } 

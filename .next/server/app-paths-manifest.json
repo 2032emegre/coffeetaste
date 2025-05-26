@@ -1,7 +1,7 @@
 {
   "/records/page": "app/records/page.js",
-  "/handdrip/[id]/edit/page": "app/handdrip/[id]/edit/page.js",
-  "/records/shop/[id]/page": "app/records/shop/[id]/page.js",
+  "/new/page": "app/new/page.js",
+  "/records/espresso/[id]/page": "app/records/espresso/[id]/page.js",
   "/records/shop/[id]/edit/page": "app/records/shop/[id]/edit/page.js",
-  "/handdrip/[id]/page": "app/handdrip/[id]/page.js"
+  "/records/espresso/[id]/edit/page": "app/records/espresso/[id]/edit/page.js"
 }

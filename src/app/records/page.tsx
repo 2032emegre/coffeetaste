@@ -89,6 +89,15 @@ const defaultTasting: Required<TastingRecord['tasting']> = {
   cleanliness: 0,
   aftertaste: 0,
   totalScore: 0,
+  aromaPowder: 0,
+  aromaPowderNote: '',
+  aromaLiquid: 0,
+  aromaLiquidNote: '',
+  flavor: 0,
+  flavorNote: '',
+  strength: 0,
+  uniformity: 0,
+  cleanness: 0,
 };
 
 // Supabaseクライアントの初期化
@@ -218,7 +227,25 @@ export default function RecordList() {
             id: 'dummy1',
             coffee: { name: 'ダミーコーヒー', origin: 'エチオピア', process: 'ウォッシュド', variety: 'ゲイシャ' },
             brewing: { dripper: 'V60' },
-            tasting: { acidity: 4, sweetness: 3, richness: 4, body: 3, balance: 5, cleanliness: 4, aftertaste: 4, totalScore: 27 },
+            tasting: {
+              acidity: 4,
+              sweetness: 3,
+              richness: 4,
+              body: 3,
+              balance: 5,
+              cleanliness: 4,
+              aftertaste: 4,
+              totalScore: 27,
+              aromaPowder: 3,
+              aromaPowderNote: 'フローラル',
+              aromaLiquid: 4,
+              aromaLiquidNote: 'ベリー',
+              flavor: 4,
+              flavorNote: 'シトラス',
+              strength: 3,
+              uniformity: 4,
+              cleanness: 4,
+            },
             nose: { positive: {}, negative: {}, notes: 'フローラル' },
             aroma: { positive: {}, negative: {}, notes: 'ベリー系' },
             personalScore: 88,
@@ -234,7 +261,25 @@ export default function RecordList() {
           {
             id: 'dummy2',
             coffee: { name: 'ダミーエスプレッソ', origin: 'ブラジル', process: 'ナチュラル', variety: 'ブルボン', roastLevel: '深煎り' },
-            tasting: { acidity: 2, sweetness: 4, richness: 5, body: 5, balance: 4, cleanliness: 3, aftertaste: 4, totalScore: 27 },
+            tasting: {
+              acidity: 2,
+              sweetness: 4,
+              richness: 5,
+              body: 5,
+              balance: 4,
+              cleanliness: 3,
+              aftertaste: 4,
+              totalScore: 27,
+              aromaPowder: 4,
+              aromaPowderNote: 'ナッツ',
+              aromaLiquid: 3,
+              aromaLiquidNote: 'チョコレート',
+              flavor: 5,
+              flavorNote: 'キャラメル',
+              strength: 5,
+              uniformity: 4,
+              cleanness: 3,
+            },
             nose: { positive: {}, negative: {}, notes: 'ナッツ' },
             aroma: { positive: {}, negative: {}, notes: 'チョコレート' },
             personalScore: 90,
@@ -250,7 +295,25 @@ export default function RecordList() {
           {
             id: 'dummy3',
             coffee: { name: 'ダミー豆', origin: 'コロンビア', process: 'ウォッシュド', variety: 'カトゥーラ' },
-            tasting: { acidity: 3, sweetness: 4, richness: 3, body: 4, balance: 4, cleanliness: 3, aftertaste: 3, totalScore: 24 },
+            tasting: {
+              acidity: 3,
+              sweetness: 4,
+              richness: 3,
+              body: 4,
+              balance: 4,
+              cleanliness: 3,
+              aftertaste: 3,
+              totalScore: 24,
+              aromaPowder: 3,
+              aromaPowderNote: 'ナッツ系',
+              aromaLiquid: 4,
+              aromaLiquidNote: 'フローラル',
+              flavor: 4,
+              flavorNote: 'チョコレート',
+              strength: 3,
+              uniformity: 4,
+              cleanness: 3,
+            },
             personalScore: 85,
             comments: 'バランス良し',
             brewing: { dripper: '焙煎機' },
@@ -595,14 +658,25 @@ export default function RecordList() {
                           onEdit={(id) => router.push(`/records/espresso/${id}/edit`)}
                           onDelete={(id) => {
                             if (window.confirm('本当に削除しますか？')) {
-                              // 削除処理をここに実装（現状はダミー）
                               setRecords(records.filter(r => r.id !== id));
                             }
                           }}
                         />
                       );
                     } else if (recordType === 'roast') {
-                      return <RoastCard key={record.id} record={record} />;
+                      return (
+                        <RoastCard
+                          key={record.id}
+                          record={record}
+                          onDetail={(id) => router.push(`/records/roast/${id}`)}
+                          onEdit={(id) => router.push(`/records/roast/${id}/edit`)}
+                          onDelete={(id) => {
+                            if (window.confirm('本当に削除しますか？')) {
+                              setRecords(records.filter(r => r.id !== id));
+                            }
+                          }}
+                        />
+                      );
                     } else if (recordType === 'shop') {
                       return <ShopCard key={record.id} record={record} />;
                     } else {

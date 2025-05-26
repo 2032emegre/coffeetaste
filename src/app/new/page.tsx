@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
-import { TastingRecord, ShopVisitRecord } from '@/types/tasting';
+import { TastingRecord, ShopVisitRecord, EspressoRecord } from '@/types/tasting';
 import EnvironmentInfo from '@/components/EnvironmentInfo';
 import AromaSection from '@/components/AromaSection';
 import CoffeeInfo from '@/components/CoffeeInfo';
 import RoastingRecordForm from '@/components/RoastingRecordForm';
 import ShopVisitForm from '@/components/ShopVisitForm';
+import EspressoForm from '@/components/EspressoForm';
 
 // Supabaseクライアントの初期化
 const supabase = createClient(
@@ -172,8 +173,8 @@ export default function NewRecord() {
 
   const calculateTotalScore = (tastingScores: typeof formData.tasting) => {
     if (!tastingScores) return 0;
-    return Object.values(tastingScores).reduce((sum, score) => {
-      if (typeof score === 'number' && score !== tastingScores.totalScore) {
+    return Object.entries(tastingScores).reduce((sum, [key, score]) => {
+      if (key !== 'totalScore' && typeof score === 'number') {
         return sum + score;
       }
       return sum;
@@ -356,6 +357,75 @@ export default function NewRecord() {
   const [tastingScores, setTastingScores] = useState<Record<TastingKey, number>>({ acidity: 0, bitterness: 0, sweetness: 0, body: 0, clarity: 0, balance: 0, aftertaste: 0 });
   // 合計点自動計算
   const totalScore = Object.values(cremaScores).reduce((a, b) => a + b, 0) + Object.values(tastingScores).reduce((a, b) => a + b, 0);
+
+  const handleEspressoSubmit = async (data: EspressoRecord) => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('espresso_records')
+        .insert([{
+          environment_date: data.environment.date,
+          environment_time: data.environment.time,
+          environment_weather: data.environment.weather,
+          environment_temperature: data.environment.temperature,
+          environment_humidity: data.environment.humidity,
+          environment_is_auto_fetched: data.environment.isAutoFetched,
+          coffee_name: data.coffee.name,
+          coffee_origin: data.coffee.origin,
+          coffee_process: data.coffee.process,
+          coffee_variety: data.coffee.variety,
+          coffee_roast_level: data.coffee.roastLevel,
+          coffee_roasted_at: data.coffee.roastedAt,
+          coffee_roast_date: data.coffee.roastDate,
+          coffee_other_info: data.coffee.otherInfo,
+          brewing_type: data.brewing.type,
+          brewing_type_other: data.brewing.typeOther,
+          brewing_grinder: data.brewing.grinder,
+          brewing_grind_setting: data.brewing.grindSetting,
+          brewing_coffee_amount: data.brewing.coffeeAmount,
+          brewing_yield: data.brewing.yield,
+          brewing_brew_time: data.brewing.brewTime,
+          brewing_temperature: data.brewing.temperature,
+          brewing_pressure: data.brewing.pressure,
+          brewing_notes: data.brewing.notes,
+          brewing_flair: data.brewing.flair,
+          brewing_flair_memo: data.brewing.flairMemo,
+          crema_color: data.crema.color,
+          crema_thickness: data.crema.thickness,
+          crema_persistence: data.crema.persistence,
+          crema_notes: data.crema.notes,
+          tasting_acidity: data.tasting.acidity,
+          tasting_sweetness: data.tasting.sweetness,
+          tasting_richness: data.tasting.richness,
+          tasting_body: data.tasting.body,
+          tasting_balance: data.tasting.balance,
+          tasting_cleanliness: data.tasting.cleanliness,
+          tasting_aftertaste: data.tasting.aftertaste,
+          tasting_total_score: data.tasting.totalScore,
+          nose_positive: data.nose.positive,
+          nose_negative: data.nose.negative,
+          nose_notes: data.nose.notes,
+          aroma_positive: data.aroma.positive,
+          aroma_negative: data.aroma.negative,
+          aroma_notes: data.aroma.notes,
+          personal_score: data.personalScore,
+          comments: data.comments,
+          notes: data.notes,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }]);
+      if (error) throw error;
+      setShowSuccess(true);
+      setTimeout(() => {
+        router.push('/records/espresso');
+      }, 1500);
+    } catch (error) {
+      console.error('Error adding record: ', error);
+      alert('記録の保存に失敗しました。もう一度お試しください。');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-gray-50">
@@ -784,271 +854,13 @@ export default function NewRecord() {
         </form>
       )}
 
-      {/* espresso用フォーム（詳細版） */}
+      {/* espresso用フォーム */}
       {recordType === 'espresso' && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 環境情報 */}
-          <EnvironmentInfo
-            formData={formData}
-            onChange={handleEnvironmentChange}
-            mode="new"
-          />
-          {/* コーヒー情報（履歴参照・オートコンプリート） */}
-          <CoffeeInfo
-            formData={formData}
-            onChange={handleCoffeeChange}
-            mode="new"
-          />
-          {/* 抽出レシピ */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">抽出レシピ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">種類</label>
-                <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500">
-                  <option value="">選択してください</option>
-                  <option value="エスプレッソ">エスプレッソ</option>
-                  <option value="アメリカーノ">アメリカーノ</option>
-                  <option value="リストレット">リストレット</option>
-                  <option value="その他">その他</option>
-                </select>
-                {/* その他選択時のみ表示 */}
-                <input type="text" className="w-full mt-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="その他の種類を記入" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">豆（g）</label>
-                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">抽出量（ml）</label>
-                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">温度（℃）</label>
-                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
-              </div>
-              <div className="md:col-span-2 flex items-center gap-2 mt-2">
-                <input type="checkbox" id="flair" className="mr-2" />
-                <label htmlFor="flair" className="text-sm font-medium text-gray-700">flair</label>
-                {/* flairチェック時のみ表示 */}
-                <input type="text" className="w-full ml-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" placeholder="flairでの抽出に関するメモ" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
-                <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={3} />
-              </div>
-              {/* 追加: グラインダー */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">グラインダー</label>
-                <select
-                  value={formData.brewing.grinder || 'Timemore'}
-                  onChange={e => setFormData({
-                    ...formData,
-                    brewing: {
-                      ...formData.brewing,
-                      grinder: e.target.value,
-                    },
-                  })}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                >
-                  <option value="Timemore">Timemore</option>
-                  <option value="その他">その他</option>
-                </select>
-              </div>
-              {/* 追加: 挽き目 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">挽き目</label>
-                <input
-                  type="text"
-                  value={formData.brewing.grindSize || ''}
-                  onChange={e => setFormData({
-                    ...formData,
-                    brewing: {
-                      ...formData.brewing,
-                      grindSize: e.target.value,
-                    },
-                  })}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
-                  placeholder="例: クリック数や目安"
-                />
-              </div>
-              {/* 追加: 抽出時間 */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">抽出時間（分:秒）</label>
-                <div className="flex space-x-2">
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={Math.floor(parseInt(formData.brewing.brewTime || '0') / 60)}
-                    onChange={e => {
-                      const minutes = parseInt(e.target.value) || 0;
-                      const seconds = parseInt(formData.brewing.brewTime || '0') % 60;
-                      setFormData({
-                        ...formData,
-                        brewing: {
-                          ...formData.brewing,
-                          brewTime: String(minutes * 60 + seconds),
-                        },
-                      });
-                    }}
-                    className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-                    placeholder="分"
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={parseInt(formData.brewing.brewTime || '0') % 60}
-                    onChange={e => {
-                      const minutes = Math.floor(parseInt(formData.brewing.brewTime || '0') / 60);
-                      const seconds = parseInt(e.target.value) || 0;
-                      setFormData({
-                        ...formData,
-                        brewing: {
-                          ...formData.brewing,
-                          brewTime: String(minutes * 60 + seconds),
-                        },
-                      });
-                    }}
-                    className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-                    placeholder="秒"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* LE NEZ/LES AROMA */}
-          <AromaSection
-            type="nose"
-            formData={formData}
-            onChange={handleAromaChange}
-            mode="new"
-          />
-          <AromaSection
-            type="aroma"
-            formData={formData}
-            onChange={handleAromaChange}
-            mode="new"
-          />
-          {/* クレマ評価（5段階丸ボタンUI） */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">クレマ評価</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { key: 'color', label: '色（淡→濃）' },
-                { key: 'thickness', label: '厚み' },
-                { key: 'persistence', label: '持続性' },
-              ].map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                  <div className="flex gap-2">
-                    {[1,2,3,4,5].map(v => (
-                      <button
-                        key={v}
-                        type="button"
-                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-base font-semibold transition-colors ${cremaScores[key as CremaKey] === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
-                        style={{ aspectRatio: '1 / 1' }}
-                        onClick={() => setCremaScores(s => ({ ...s, [key as CremaKey]: v }))}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-          {/* テイスティング評価（5段階丸ボタンUI） */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">テイスティング評価</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { key: 'acidity', label: '酸味' },
-                { key: 'bitterness', label: '苦味' },
-                { key: 'sweetness', label: '甘み' },
-                { key: 'body', label: 'ボディ' },
-                { key: 'clarity', label: 'クリア度' },
-                { key: 'balance', label: 'バランス' },
-                { key: 'aftertaste', label: '余韻' },
-              ].map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                  <div className="flex gap-2">
-                    {[1,2,3,4,5].map(v => (
-                      <button
-                        key={v}
-                        type="button"
-                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-base font-semibold transition-colors ${tastingScores[key as TastingKey] === v ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
-                        style={{ aspectRatio: '1 / 1' }}
-                        onClick={() => setTastingScores(s => ({ ...s, [key as TastingKey]: v }))}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-          {/* 総合評価 */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">個人スコア (0-100)</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={formData.personalScore}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        personalScore: Number(e.target.value),
-                      })
-                    }
-                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    style={{ accentColor: '#111' }}
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.personalScore}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        personalScore: Number(e.target.value),
-                      })
-                    }
-                    className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
-                  />
-                  <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personalScore}</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">評価点数（クレマ＋テイスティング合計）</label>
-                <input type="number" className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" value={totalScore} readOnly />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">総合評価・コメント</label>
-                <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={4} />
-              </div>
-            </div>
-          </section>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? '保存中...' : '記録を保存'}
-            </button>
-          </div>
-        </form>
+        <EspressoForm
+          onSubmit={handleEspressoSubmit}
+          loading={isSubmitting}
+          mode="new"
+        />
       )}
 
       {/* roast用フォーム */}
@@ -1080,6 +892,7 @@ export default function NewRecord() {
           }}
           loading={isSubmitting}
           error={weatherError}
+          mode="new"
         />
       )}
 
@@ -1114,14 +927,14 @@ export default function NewRecord() {
           }}
           isSubmitting={isSubmitting}
           submitError={weatherError}
+          mode="new"
         />
       )}
 
       {showSuccess && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-medium text-gray-900">記録を保存しました！</p>
-            <p className="text-sm text-gray-600 mt-2">記録一覧ページに移動します...</p>
+            <p className="text-lg font-semibold text-gray-900">記録を保存しました！</p>
           </div>
         </div>
       )}

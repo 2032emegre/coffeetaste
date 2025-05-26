@@ -6,6 +6,7 @@ import EnvironmentInfo from '@/components/EnvironmentInfo';
 import CoffeeInfo from '@/components/CoffeeInfo';
 import AromaSection from '@/components/AromaSection';
 import RadarChart from '@/components/RadarChart';
+import EspressoForm from '@/components/EspressoForm';
 
 // ダミーデータ（Supabase espresso_recordsに準拠）
 const dummyRecord: EspressoRecord = {
@@ -55,76 +56,11 @@ export default function EspressoDetailPage({ params }: { params: { id: string } 
           </button>
         </div>
       </div>
-      <form className="space-y-6">
-        <EnvironmentInfo formData={record as any} onChange={() => {}} mode="view" recordType="espresso" />
-        <CoffeeInfo formData={record as any} onChange={() => {}} mode="view" />
-        <AromaSection type="nose" formData={record as any} onChange={() => {}} mode="view" />
-        <AromaSection type="aroma" formData={record as any} onChange={() => {}} mode="view" />
-        <div className="my-4">
-          <h3 className="font-bold">クレマ評価</h3>
-          <RadarChart tasting={cremaTasting} mode="crema" />
-        </div>
-        <div className="my-4">
-          <h3 className="font-bold">テイスティング評価</h3>
-          <RadarChart tasting={record.tasting} mode="espresso-taste" />
-        </div>
-        <div className="my-4">
-          <h3 className="font-bold">コメント</h3>
-          <div className="bg-gray-100 rounded p-3 min-h-[48px]">{record.comments}</div>
-        </div>
-        {/* 抽出レシピ */}
-        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">抽出レシピ</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">種類</label>
-              <div className="text-gray-900">{record.brewing.type || '-'}</div>
-              {record.brewing.type === 'その他' && (
-                <div className="text-gray-900 mt-1">{record.brewing.typeOther || '-'}</div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">豆（g）</label>
-              <div className="text-gray-900">{record.brewing.coffeeAmount || '-'}</div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">抽出量（ml）</label>
-              <div className="text-gray-900">{record.brewing.yield || '-'}</div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">温度（℃）</label>
-              <div className="text-gray-900">{record.brewing.temperature || '-'}</div>
-            </div>
-            <div className="md:col-span-2 flex items-center gap-2 mt-2">
-              <input type="checkbox" checked={!!record.brewing.flair} readOnly className="mr-2" />
-              <span className="text-sm font-medium text-gray-700">flair</span>
-              {record.brewing.flairMemo && (
-                <span className="ml-2 text-gray-900">{record.brewing.flairMemo}</span>
-              )}
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
-              <div className="text-gray-900 whitespace-pre-line">{record.brewing.notes || '-'}</div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">グラインダー</label>
-              <div className="text-gray-900">{record.brewing.grinder || '-'}</div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">挽き目</label>
-              <div className="text-gray-900">{record.brewing.grindSetting || '-'}</div>
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">抽出時間（分:秒）</label>
-              <div className="text-gray-900">
-                {record.brewing.brewTime
-                  ? `${Math.floor(Number(record.brewing.brewTime) / 60)}分${Number(record.brewing.brewTime) % 60}秒`
-                  : '-'}
-              </div>
-            </div>
-          </div>
-        </section>
-      </form>
+      <EspressoForm
+        initialData={record}
+        onSubmit={async () => Promise.resolve()}
+        mode="view"
+      />
     </div>
   );
 } 

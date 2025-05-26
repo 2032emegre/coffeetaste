@@ -14,7 +14,7 @@ export type ShopVisitFormProps = {
   onSubmit: (data: ShopVisitRecord) => Promise<void>;
   isSubmitting?: boolean;
   submitError?: string | null;
-  mode?: 'view' | 'edit';
+  mode?: 'view' | 'edit' | 'new';
 };
 
 export default function ShopVisitForm({
@@ -395,17 +395,15 @@ export default function ShopVisitForm({
       )}
 
       {/* 送信ボタン */}
-      {mode === 'edit' && (
-        <div className="flex justify-end space-x-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? '保存中...' : '保存'}
-          </button>
-        </div>
-      )}
+      <div className="flex justify-end mt-6">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? '保存中...' : mode === 'edit' ? '更新' : '記録を保存'}
+        </button>
+      </div>
     </form>
   );
 } 

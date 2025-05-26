@@ -44,6 +44,15 @@ export interface TastingRecord {
         cleanliness: number;  // 1-5
         aftertaste: number;   // 1-5
         totalScore: number;   // 自動計算される合計スコア
+        aromaPowder: number;        // 1-5 粉の香り
+        aromaPowderNote: string;    // 粉の香りノート
+        aromaLiquid: number;        // 1-5 液体の香り
+        aromaLiquidNote: string;    // 液体の香りノート
+        flavor: number;             // 1-5 風味
+        flavorNote: string;         // 風味ノート
+        strength: number;           // 1-5 濃さ
+        uniformity: number;         // 1-5 均一性
+        cleanness: number;          // 1-5 カップの綺麗さ
     };
     nose: {
         positive: { [key: string]: boolean | string };
@@ -160,6 +169,15 @@ export type EspressoRecord = {
     cleanliness: number;
     aftertaste: number;
     totalScore: number;
+    aromaPowder?: number;
+    aromaPowderNote?: string;
+    aromaLiquid?: number;
+    aromaLiquidNote?: string;
+    flavor?: number;
+    flavorNote?: string;
+    strength?: number;
+    uniformity?: number;
+    cleanness?: number;
   };
   nose: {
     positive: { [key: string]: boolean | string };
