@@ -3,26 +3,26 @@ import ReactECharts from 'echarts-for-react';
 
 type Indicator = { name: string; max: number };
 
-type RadarChartProps = {
+export type RadarChartProps = {
   // 新しい柔軟な呼び出し方
   indicator?: Indicator[];
   value?: number[];
   // 従来の呼び出し方（後方互換）
-  tasting?: {
+  tasting: {
     acidity: number;
     sweetness: number;
-    richness?: number;
+    richness: number;
     body: number;
     balance: number;
-    cleanliness?: number;
-    aftertaste?: number;
+    cleanliness: number;
+    aftertaste: number;
     bitterness?: number;
     clarity?: number;
     strength?: number;
     uniformity?: number;
     cleanness?: number;
   };
-  mode?: 'crema' | 'espresso-taste' | 'default' | 'roast';
+  mode?: 'default' | 'crema' | 'espresso-taste' | 'roast' | 'shop';
 };
 
 const DEFAULT_INDICATOR = [
@@ -35,74 +35,97 @@ const DEFAULT_INDICATOR = [
   { name: '余韻', max: 5 },
 ];
 
-const RadarChart: React.FC<RadarChartProps> = ({ indicator, value, tasting, mode = 'default' }) => {
+const getRadarOption = (tasting: RadarChartProps['tasting'], mode: RadarChartProps['mode'] = 'default') => {
   let usedIndicator: Indicator[];
   let usedValue: number[];
 
-  if (indicator && value) {
-    usedIndicator = indicator;
-    usedValue = value;
-  } else if (tasting) {
-    if (mode === 'crema') {
-      usedIndicator = [
-        { name: '色', max: 5 },
-        { name: '厚み', max: 5 },
-        { name: '持続性', max: 5 },
-      ];
-      usedValue = [tasting.acidity, tasting.sweetness, tasting.richness ?? 0];
-    } else if (mode === 'espresso-taste') {
-      usedIndicator = [
-        { name: '酸味', max: 5 },
-        { name: '苦味', max: 5 },
-        { name: '甘み', max: 5 },
-        { name: '余韻', max: 5 },
-        { name: 'バランス', max: 5 },
-        { name: 'ボディ', max: 5 },
-        { name: 'クリア度', max: 5 },
-      ];
-      usedValue = [
-        tasting.acidity ?? 0,
-        tasting.bitterness ?? 0,
-        tasting.sweetness ?? 0,
-        tasting.aftertaste ?? 0,
-        tasting.balance ?? 0,
-        tasting.body ?? 0,
-        tasting.clarity ?? 0,
-      ];
-    } else if (mode === 'roast') {
-      usedIndicator = [
-        { name: '酸味', max: 5 },
-        { name: '濃さ', max: 5 },
-        { name: '均一性', max: 5 },
-        { name: '余韻', max: 5 },
-        { name: '甘み', max: 5 },
-        { name: 'ボディ', max: 5 },
-        { name: 'カップの綺麗さ', max: 5 },
-      ];
-      usedValue = [
-        tasting.acidity ?? 0,
-        tasting.strength ?? 0,
-        tasting.uniformity ?? 0,
-        tasting.aftertaste ?? 0,
-        tasting.sweetness ?? 0,
-        tasting.body ?? 0,
-        tasting.cleanness ?? 0,
-      ];
-    } else {
-      usedIndicator = DEFAULT_INDICATOR;
-      usedValue = [
-        tasting.acidity,
-        tasting.sweetness,
-        tasting.richness ?? 0,
-        tasting.body,
-        tasting.balance,
-        tasting.cleanliness ?? 0,
-        tasting.aftertaste ?? 0,
-      ];
-    }
+  if (mode === 'crema') {
+    usedIndicator = [
+      { name: '色', max: 5 },
+      { name: '厚み', max: 5 },
+      { name: '持続性', max: 5 },
+      { name: '', max: 5 },
+      { name: '', max: 5 },
+      { name: '', max: 5 },
+      { name: '', max: 5 },
+    ];
+    usedValue = [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      0,
+      0,
+      0,
+      0,
+    ];
+  } else if (mode === 'espresso-taste') {
+    usedIndicator = [
+      { name: '酸味', max: 5 },
+      { name: '甘味', max: 5 },
+      { name: 'コク', max: 5 },
+      { name: 'ボディ', max: 5 },
+      { name: 'バランス', max: 5 },
+      { name: 'クリーン', max: 5 },
+      { name: '余韻', max: 5 },
+    ];
+    usedValue = [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      tasting.body,
+      tasting.balance,
+      tasting.cleanliness,
+      tasting.aftertaste,
+    ];
+  } else if (mode === 'roast') {
+    usedIndicator = [
+      { name: '酸味', max: 5 },
+      { name: '甘味', max: 5 },
+      { name: 'コク', max: 5 },
+      { name: 'ボディ', max: 5 },
+      { name: 'バランス', max: 5 },
+      { name: 'クリーン', max: 5 },
+      { name: '余韻', max: 5 },
+    ];
+    usedValue = [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      tasting.body,
+      tasting.balance,
+      tasting.cleanliness,
+      tasting.aftertaste,
+    ];
+  } else if (mode === 'shop') {
+    usedIndicator = [
+      { name: '酸味', max: 5 },
+      { name: '甘味', max: 5 },
+      { name: 'コク', max: 5 },
+      { name: 'ボディ', max: 5 },
+      { name: 'バランス', max: 5 },
+      { name: 'クリーン', max: 5 },
+      { name: '余韻', max: 5 },
+    ];
+    usedValue = [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      tasting.body,
+      tasting.balance,
+      tasting.cleanliness,
+      tasting.aftertaste,
+    ];
   } else {
     usedIndicator = DEFAULT_INDICATOR;
-    usedValue = [0, 0, 0, 0, 0, 0, 0];
+    usedValue = [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      tasting.body,
+      tasting.balance,
+      tasting.cleanliness,
+      tasting.aftertaste,
+    ];
   }
 
   const option = {
@@ -136,6 +159,12 @@ const RadarChart: React.FC<RadarChartProps> = ({ indicator, value, tasting, mode
       },
     ],
   };
+
+  return option;
+};
+
+const RadarChart: React.FC<RadarChartProps> = ({ indicator, value, tasting, mode = 'default' }) => {
+  const option = getRadarOption(tasting, mode);
 
   return <ReactECharts option={option} style={{ height: 280, width: 280 }} />;
 };

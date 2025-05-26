@@ -14,6 +14,7 @@ export type ShopVisitFormProps = {
   onSubmit: (data: ShopVisitRecord) => Promise<void>;
   isSubmitting?: boolean;
   submitError?: string | null;
+  mode?: 'view' | 'edit';
 };
 
 export default function ShopVisitForm({
@@ -21,6 +22,7 @@ export default function ShopVisitForm({
   onSubmit,
   isSubmitting = false,
   submitError = null,
+  mode = 'edit',
 }: ShopVisitFormProps) {
   const [formData, setFormData] = useState<ShopVisitRecord>(() => ({
     environment: {
@@ -176,7 +178,7 @@ export default function ShopVisitForm({
         <EnvironmentInfo
           formData={formData}
           onChange={handleEnvironmentChange}
-          mode="edit"
+          mode={mode}
           recordType="shop"
         />
       </section>
@@ -193,6 +195,7 @@ export default function ShopVisitForm({
               onChange={e => handleShopChange('name', e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               required
+              readOnly={mode === 'view'}
             />
           </div>
           <div>
@@ -203,6 +206,7 @@ export default function ShopVisitForm({
               onChange={e => handleShopChange('link', e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               placeholder="https://..."
+              readOnly={mode === 'view'}
             />
           </div>
         </div>
@@ -216,6 +220,7 @@ export default function ShopVisitForm({
             type="button"
             onClick={handleItemAdd}
             className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            disabled={mode === 'view'}
           >
             追加
           </button>
@@ -233,6 +238,7 @@ export default function ShopVisitForm({
                       onChange={e => handleItemChange(index, 'name', e.target.value)}
                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       required
+                      readOnly={mode === 'view'}
                     />
                   </div>
                   <div>
@@ -244,15 +250,17 @@ export default function ShopVisitForm({
                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       required
                       min="0"
+                      readOnly={mode === 'view'}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">飲み物種別</label>
                     <select
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       value={item.type || ''}
                       onChange={e => handleItemChange(index, 'type', e.target.value)}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       required
+                      disabled={mode === 'view'}
                     >
                       <option value="">選択してください</option>
                       <option value="coffee">コーヒー</option>
@@ -263,10 +271,11 @@ export default function ShopVisitForm({
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">淹れ方</label>
                     <select
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       value={item.method || ''}
                       onChange={e => handleItemChange(index, 'method', e.target.value)}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       required
+                      disabled={mode === 'view'}
                     >
                       <option value="">選択してください</option>
                       <option value="ハンドドリップ">ハンドドリップ</option>
@@ -283,6 +292,7 @@ export default function ShopVisitForm({
                         onChange={e => handleItemChange(index, 'methodOther', e.target.value)}
                         className="w-full mt-2 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                         placeholder="その他の淹れ方を記入"
+                        readOnly={mode === 'view'}
                       />
                     )}
                   </div>
@@ -291,6 +301,7 @@ export default function ShopVisitForm({
                   type="button"
                   onClick={() => handleItemRemove(index)}
                   className="ml-4 p-1 text-gray-400 hover:text-gray-500"
+                  disabled={mode === 'view'}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -310,6 +321,7 @@ export default function ShopVisitForm({
                         onChange={e => handleItemChange(index, 'origin', e.target.value)}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                         placeholder="例: エチオピア"
+                        readOnly={mode === 'view'}
                       />
                     </div>
                     <div>
@@ -320,6 +332,7 @@ export default function ShopVisitForm({
                         onChange={e => handleItemChange(index, 'roastLevel', e.target.value)}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                         placeholder="例: 浅煎り"
+                        readOnly={mode === 'view'}
                       />
                     </div>
                     <div>
@@ -330,6 +343,7 @@ export default function ShopVisitForm({
                         onChange={e => handleItemChange(index, 'variety', e.target.value)}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                         placeholder="例: ブルボン"
+                        readOnly={mode === 'view'}
                       />
                     </div>
                   </div>
@@ -358,6 +372,7 @@ export default function ShopVisitForm({
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               rows={4}
               placeholder="店舗の雰囲気や印象、気づきなどを記入してください"
+              readOnly={mode === 'view'}
             />
           </div>
           <div>
@@ -368,6 +383,7 @@ export default function ShopVisitForm({
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               rows={2}
               placeholder="スタッフの対応や印象などを記入してください"
+              readOnly={mode === 'view'}
             />
           </div>
         </div>
@@ -379,22 +395,17 @@ export default function ShopVisitForm({
       )}
 
       {/* 送信ボタン */}
-      <div className="flex justify-end space-x-4">
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-        >
-          キャンセル
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? '保存中...' : '保存'}
-        </button>
-      </div>
+      {mode === 'edit' && (
+        <div className="flex justify-end space-x-4">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? '保存中...' : '保存'}
+          </button>
+        </div>
+      )}
     </form>
   );
 } 
