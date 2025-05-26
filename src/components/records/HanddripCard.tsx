@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { TastingRecord } from '@/types/tasting';
 import ReactECharts from 'echarts-for-react';
 import { format } from 'date-fns';
@@ -11,7 +12,8 @@ type Props = {
   onDetail?: (id: string) => void;
 };
 
-const HanddripCard: React.FC<Props> = ({ record, onEdit, onDelete, onDetail }) => {
+const HanddripCard: React.FC<Props> = ({ record }) => {
+  const router = useRouter();
   // データが存在しない場合の表示用ヘルパー関数
   const displayValue = (value: any, unit: string = '') => {
     if (value === undefined || value === null || value === '') return '-';
@@ -186,19 +188,24 @@ const HanddripCard: React.FC<Props> = ({ record, onEdit, onDelete, onDetail }) =
         {/* アクションボタン */}
         <div className="flex justify-end space-x-2 mt-auto pt-4 border-t">
           <button
-            onClick={() => onDetail?.(record.id!)}
+            onClick={() => router.push(`/handdrip/${record.id}`)}
             className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
           >
             詳細
           </button>
           <button
-            onClick={() => onEdit?.(record.id!)}
+            onClick={() => router.push(`/handdrip/${record.id}/edit`)}
             className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
           >
             編集
           </button>
           <button
-            onClick={() => onDelete?.(record.id!)}
+            onClick={() => {
+              if (window.confirm('本当に削除しますか？')) {
+                // 削除処理（現状はダミー）
+                alert('削除しました（ダミー）');
+              }
+            }}
             className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded text-red-600"
           >
             削除

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
 import { TastingRecord } from '@/types/tasting';
 import { searchOrigins } from '@/data/coffee-origins';
@@ -8,7 +10,7 @@ export type RecordFormProps = {
   onSubmit: (data: TastingRecord) => Promise<void>;
   loading?: boolean;
   error?: string | null;
-  mode?: 'new' | 'edit';
+  mode?: 'new' | 'edit' | 'view';
 };
 
 const DRIPPERS = ["SilkDripper", "FlowerDripper", "その他"];
@@ -137,7 +139,14 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">日付</label>
-            <input type="date" value={formData.environment.date} onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, date: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" required />
+            <input 
+              type="date" 
+              value={formData.environment.date} 
+              onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, date: e.target.value } }))} 
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" 
+              required 
+              disabled={mode === 'view'}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">時刻</label>
@@ -379,9 +388,15 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {(localError || error) && <div className="text-red-500 text-sm">{localError || error}</div>}
-      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" disabled={loading}>
-        {loading ? '保存中...' : mode === 'edit' ? '更新' : '保存'}
-      </button>
+      {mode !== 'view' && (
+        <button 
+          type="submit" 
+          className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" 
+          disabled={loading}
+        >
+          {loading ? '保存中...' : mode === 'edit' ? '更新' : '保存'}
+        </button>
+      )}
     </form>
   );
 } 

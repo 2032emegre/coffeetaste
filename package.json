@@ -15,6 +15,7 @@
     "autoprefixer": "^10.4.17",
     "chart.js": "^4.4.9",
     "chartjs-node-canvas": "^5.0.0",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",

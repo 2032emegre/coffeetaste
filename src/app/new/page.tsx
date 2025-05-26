@@ -837,6 +837,85 @@ export default function NewRecord() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
                 <textarea className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={3} />
               </div>
+              {/* 追加: グラインダー */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">グラインダー</label>
+                <select
+                  value={formData.brewing.grinder || 'Timemore'}
+                  onChange={e => setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
+                      grinder: e.target.value,
+                    },
+                  })}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+                >
+                  <option value="Timemore">Timemore</option>
+                  <option value="その他">その他</option>
+                </select>
+              </div>
+              {/* 追加: 挽き目 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">挽き目</label>
+                <input
+                  type="text"
+                  value={formData.brewing.grindSize || ''}
+                  onChange={e => setFormData({
+                    ...formData,
+                    brewing: {
+                      ...formData.brewing,
+                      grindSize: e.target.value,
+                    },
+                  })}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+                  placeholder="例: クリック数や目安"
+                />
+              </div>
+              {/* 追加: 抽出時間 */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">抽出時間（分:秒）</label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={Math.floor(parseInt(formData.brewing.brewTime || '0') / 60)}
+                    onChange={e => {
+                      const minutes = parseInt(e.target.value) || 0;
+                      const seconds = parseInt(formData.brewing.brewTime || '0') % 60;
+                      setFormData({
+                        ...formData,
+                        brewing: {
+                          ...formData.brewing,
+                          brewTime: String(minutes * 60 + seconds),
+                        },
+                      });
+                    }}
+                    className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                    placeholder="分"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={parseInt(formData.brewing.brewTime || '0') % 60}
+                    onChange={e => {
+                      const minutes = Math.floor(parseInt(formData.brewing.brewTime || '0') / 60);
+                      const seconds = parseInt(e.target.value) || 0;
+                      setFormData({
+                        ...formData,
+                        brewing: {
+                          ...formData.brewing,
+                          brewTime: String(minutes * 60 + seconds),
+                        },
+                      });
+                    }}
+                    className="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                    placeholder="秒"
+                  />
+                </div>
+              </div>
             </div>
           </section>
           {/* LE NEZ/LES AROMA */}
