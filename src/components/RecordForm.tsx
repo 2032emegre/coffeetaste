@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { TastingRecord } from '@/types/tasting';
 import { searchOrigins } from '@/data/coffee-origins';
 import { useDebounce } from '@/hooks/useDebounce';
+import AromaSection from '@/components/AromaSection';
 
 export type RecordFormProps = {
   initialData: TastingRecord;
@@ -11,6 +12,7 @@ export type RecordFormProps = {
   loading?: boolean;
   error?: string | null;
   mode?: 'new' | 'edit' | 'view';
+  readOnly?: boolean;
 };
 
 const DRIPPERS = ["SilkDripper", "FlowerDripper", "その他"];
@@ -18,8 +20,8 @@ const GRINDERS = ["Timemore", "その他"];
 const PROCESSES = ["ウォッシュド", "ナチュラル", "ハニー", "その他"];
 const VARIETIES = ["ティピカ", "ブルボン", "カトゥアイ", "その他"];
 const ROAST_LEVELS = ["浅煎り", "中煎り", "深煎り"];
-const NOSE_POSITIVE = ["ナッツ", "赤い果実", "核果", "草葉", "トロピカルフルーツ", "柑橘類", "花", "スパイス"];
-const NOSE_NEGATIVE = ["タバコ", "焦げ臭", "草葉", "樹木"];
+const NOSE_POSITIVE = ["ナッツ", "赤い果実", "核果", "草葉", "トロピカルフルーツ", "柑橘類", "花", "スパイス", "その他"] as const;
+const NOSE_NEGATIVE = ["タバコ", "焦げ臭", "草葉", "樹木", "その他"] as const;
 const AROMA_POSITIVE = NOSE_POSITIVE;
 const AROMA_NEGATIVE = NOSE_NEGATIVE;
 
@@ -33,7 +35,7 @@ const TASTING_KEYS = [
   'aftertaste',
 ] as const;
 
-export default function RecordForm({ initialData, onSubmit, loading, error, mode = 'new' }: RecordFormProps) {
+export default function RecordForm({ initialData, onSubmit, loading, error, mode = 'new', readOnly = false }: RecordFormProps) {
   const [formData, setFormData] = useState<TastingRecord>(initialData);
   const [localError, setLocalError] = useState<string | null>(null);
   const [originSuggestions, setOriginSuggestions] = useState<string[]>([]);
@@ -48,11 +50,29 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
-    if (!formData.environment.date || !formData.environment.time || !formData.coffee.name) {
-      setLocalError("日付、時刻、コーヒー名は必須です");
+
+    // 必須項目のバリデーション
+    const missingFields: string[] = [];
+
+    if (!formData.environment.date) {
+      missingFields.push('日付');
+    }
+    if (!formData.environment.time) {
+      missingFields.push('時刻');
+    }
+    if (!formData.coffee.name) {
+      missingFields.push('コーヒー名');
+    }
+    if (!formData.comments) {
+      missingFields.push('コメント');
+    }
+
+    if (missingFields.length > 0) {
+      setLocalError(`以下の項目は必須です: ${missingFields.join(', ')}`);
       return;
     }
-    await onSubmit(formData);
+
+    await onSubmit({ ...formData, environment_id: initialData.environment_id, coffee_id: initialData.coffee_id });
   };
 
   // コーヒー名が変更されたときに過去の情報を取得（履歴プリフィル強化）
@@ -112,23 +132,40 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
   };
 
   // truthyバグ修正用: チェックボックスの値を厳密にbooleanで管理
-  const handleNoseAromaCheck = (section: 'nose'|'aroma', type: 'positive'|'negative', key: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [type]: {
-          ...prev[section][type],
-          [key]: checked
+  const handleNoseAromaCheck = (section: 'nose'|'aroma', type: 'positive'|'negative'|'notes', key: string, value: boolean|string) => {
+    if (type === 'notes') {
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          notes: value as string
         }
-      }
-    }));
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [type]: {
+            ...prev[section][type],
+            [key]: value as boolean
+          }
+        }
+      }));
+    }
   };
 
   // テイスティング合計自動計算
-  const calcTotalScore = () => {
-    const t = formData.tasting;
-    return (t.acidity + t.sweetness + t.richness + t.body + t.balance + t.cleanliness + t.aftertaste);
+  const calcTotalScore = (tasting: typeof formData.tasting) => {
+    return [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      tasting.body,
+      tasting.balance,
+      tasting.cleanliness,
+      tasting.aftertaste
+    ].reduce((sum, score) => sum + (score || 0), 0);
   };
 
   return (
@@ -138,19 +175,29 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
         <h2 className="text-xl font-semibold text-gray-900">環境情報</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">日付</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              日付 <span className="text-red-500">*</span>
+            </label>
             <input 
               type="date" 
               value={formData.environment.date} 
               onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, date: e.target.value } }))} 
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" 
               required 
-              disabled={mode === 'view'}
+              disabled={mode === 'view' || readOnly}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">時刻</label>
-            <input type="time" value={formData.environment.time} onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, time: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" required />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              時刻 <span className="text-red-500">*</span>
+            </label>
+            <input 
+              type="time" 
+              value={formData.environment.time} 
+              onChange={e => setFormData(prev => ({ ...prev, environment: { ...prev.environment, time: e.target.value } }))} 
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" 
+              required 
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">天気</label>
@@ -168,8 +215,19 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
         <h2 className="text-xl font-semibold text-gray-900">コーヒー情報</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative">
-            <label htmlFor="coffeeName" className="block text-sm font-medium text-gray-700">コーヒー名</label>
-            <input type="text" id="coffeeName" value={formData.coffee.name} onChange={e => setFormData(prev => ({ ...prev, coffee: { ...prev.coffee, name: e.target.value } }))} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="例: エチオピア イルガチェフェ" />
+            <label htmlFor="coffeeName" className="block text-sm font-medium text-gray-700">
+              コーヒー名 <span className="text-red-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="coffeeName" 
+              name="coffeeName" 
+              value={formData.coffee.name} 
+              onChange={e => setFormData(prev => ({ ...prev, coffee: { ...prev.coffee, name: e.target.value } }))} 
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+              placeholder="例: エチオピア イルガチェフェ" 
+              required 
+            />
             {isLoadingHistory && (<div className="absolute right-2 top-1/2 -translate-y-1/2"><div className="animate-spin h-4 w-4 border-2 border-blue-500 rounded-full border-t-transparent"></div></div>)}
           </div>
           <div className="relative">
@@ -182,9 +240,16 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
             <input
               type="number"
               value={formData.coffee.altitude ?? ''}
-              onChange={e => setFormData(prev => ({ ...prev, coffee: { ...prev.coffee, altitude: e.target.value === '' ? undefined : Number(e.target.value) } }))}
+              onChange={e => setFormData(prev => ({ 
+                ...prev, 
+                coffee: { 
+                  ...prev.coffee, 
+                  altitude: e.target.value === '' ? null : Number(e.target.value) 
+                } 
+              }))}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               placeholder="例: 1500"
+              readOnly={readOnly}
             />
           </div>
           <div>
@@ -207,7 +272,19 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">その他の情報</label>
-            <input type="text" value={formData.coffee.otherInfo ?? ''} onChange={e => setFormData(prev => ({ ...prev, coffee: { ...prev.coffee, otherInfo: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input 
+              type="text" 
+              value={formData.coffee.other_info ?? ''} 
+              onChange={e => setFormData(prev => ({ 
+                ...prev, 
+                coffee: { 
+                  ...prev.coffee, 
+                  other_info: e.target.value 
+                } 
+              }))} 
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              readOnly={readOnly}
+            />
           </div>
         </div>
       </section>
@@ -232,7 +309,13 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">挽き目</label>
-            <input type="text" value={formData.brewing.grindSize ?? ''} onChange={e => setFormData(prev => ({ ...prev, brewing: { ...prev.brewing, grindSize: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input 
+              type="text" 
+              value={formData.brewing.grindSetting ?? ''} 
+              onChange={e => setFormData(prev => ({ ...prev, brewing: { ...prev.brewing, grindSetting: e.target.value } }))} 
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              readOnly={readOnly}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">温度</label>
@@ -290,9 +373,7 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
                       tasting: {
                         ...prev.tasting,
                         [key]: value,
-                        totalScore: (key === 'acidity' || key === 'sweetness' || key === 'richness' || key === 'body' || key === 'balance' || key === 'cleanliness' || key === 'aftertaste')
-                          ? prev.tasting.acidity + prev.tasting.sweetness + prev.tasting.richness + prev.tasting.body + prev.tasting.balance + prev.tasting.cleanliness + prev.tasting.aftertaste - prev.tasting[key as keyof typeof prev.tasting] + value
-                          : prev.tasting.totalScore
+                        totalScore: calcTotalScore(prev.tasting)
                       }
                     }))}
                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${formData.tasting[key as keyof typeof formData.tasting] === value ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'}`}
@@ -307,66 +388,28 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
       </section>
 
       {/* --- LE NEZ --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900">LE NEZ</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="font-semibold text-gray-700 mb-1">ポジティブ</div>
-            <div className="flex flex-wrap gap-2">
-              {NOSE_POSITIVE.map(key => (
-                <label key={key} className="inline-flex items-center">
-                  <input type="checkbox" checked={!!formData.nose.positive[key]} onChange={e => handleNoseAromaCheck('nose','positive',key,e.target.checked)} className="mr-1" />{key}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="font-semibold text-gray-700 mb-1">ネガティブ</div>
-            <div className="flex flex-wrap gap-2">
-              {NOSE_NEGATIVE.map(key => (
-                <label key={key} className="inline-flex items-center">
-                  <input type="checkbox" checked={!!formData.nose.negative[key]} onChange={e => handleNoseAromaCheck('nose','negative',key,e.target.checked)} className="mr-1" />{key}
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">ノート</label>
-          <textarea value={formData.nose.notes ?? ''} onChange={e => setFormData(prev => ({ ...prev, nose: { ...prev.nose, notes: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={2} />
-        </div>
-      </section>
+      <AromaSection
+        type="nose"
+        formData={formData}
+        onChange={handleNoseAromaCheck}
+        mode={mode}
+        positiveOtherNote={formData.nose.positive_other_note || ''}
+        onPositiveOtherNoteChange={(value: string) => setFormData(prev => ({ ...prev, nose: { ...prev.nose, positive_other_note: value } }))}
+        negativeOtherNote={formData.nose.negative_other_note || ''}
+        onNegativeOtherNoteChange={(value: string) => setFormData(prev => ({ ...prev, nose: { ...prev.nose, negative_other_note: value } }))}
+      />
 
       {/* --- LES ARÔMES --- */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900">LES ARÔMES</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="font-semibold text-gray-700 mb-1">ポジティブ</div>
-            <div className="flex flex-wrap gap-2">
-              {AROMA_POSITIVE.map(key => (
-                <label key={key} className="inline-flex items-center">
-                  <input type="checkbox" checked={!!formData.aroma.positive[key]} onChange={e => handleNoseAromaCheck('aroma','positive',key,e.target.checked)} className="mr-1" />{key}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="font-semibold text-gray-700 mb-1">ネガティブ</div>
-            <div className="flex flex-wrap gap-2">
-              {AROMA_NEGATIVE.map(key => (
-                <label key={key} className="inline-flex items-center">
-                  <input type="checkbox" checked={!!formData.aroma.negative[key]} onChange={e => handleNoseAromaCheck('aroma','negative',key,e.target.checked)} className="mr-1" />{key}
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">ノート</label>
-          <textarea value={formData.aroma.notes ?? ''} onChange={e => setFormData(prev => ({ ...prev, aroma: { ...prev.aroma, notes: e.target.value } }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={2} />
-        </div>
-      </section>
+      <AromaSection
+        type="aroma"
+        formData={formData}
+        onChange={handleNoseAromaCheck}
+        mode={mode}
+        positiveOtherNote={formData.aroma.positive_other_note || ''}
+        onPositiveOtherNoteChange={(value: string) => setFormData(prev => ({ ...prev, aroma: { ...prev.aroma, positive_other_note: value } }))}
+        negativeOtherNote={formData.aroma.negative_other_note || ''}
+        onNegativeOtherNoteChange={(value: string) => setFormData(prev => ({ ...prev, aroma: { ...prev.aroma, negative_other_note: value } }))}
+      />
 
       {/* --- 総合評価 --- */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
@@ -374,16 +417,36 @@ export default function RecordForm({ initialData, onSubmit, loading, error, mode
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">評価合計</label>
-            <div className="text-lg font-bold">{calcTotalScore()} / 35</div>
+            <div className="text-lg font-bold">{calcTotalScore(formData.tasting)} / 35</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">個人スコア (0-100)</label>
-            <input type="number" min={0} max={100} value={formData.personalScore} onChange={e => setFormData(prev => ({ ...prev, personalScore: Number(e.target.value) }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" />
+            <input 
+              type="number" 
+              min={0} 
+              max={100} 
+              value={formData.personal_score} 
+              onChange={e => setFormData(prev => ({ ...prev, personal_score: Number(e.target.value) }))} 
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+              readOnly={readOnly}
+            />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">コメント・気付き・改善点・比較</label>
-          <textarea value={formData.comments ?? ''} onChange={e => setFormData(prev => ({ ...prev, comments: e.target.value }))} className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" rows={3} />
+          <label htmlFor="comments" className="block text-sm font-medium text-gray-700 mb-1">
+            コメント <span className="text-red-500">*</span>
+          </label>
+          <textarea 
+            id="comments" 
+            name="comments" 
+            value={formData.comments ?? ''} 
+            onChange={e => setFormData(prev => ({ ...prev, comments: e.target.value }))} 
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500" 
+            rows={3} 
+            required 
+            placeholder="コメントや気づき、改善点などを記入してください"
+            readOnly={readOnly}
+          />
         </div>
       </section>
 

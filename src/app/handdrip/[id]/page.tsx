@@ -1,42 +1,60 @@
 "use client";
 
 import RecordForm from '@/components/RecordForm';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { TastingRecord } from '@/types/tasting';
-
-// 仮のダミーデータ
-const dummyRecord: TastingRecord = {
-  id: '1',
-  environment: { date: '2024-06-01', time: '10:00', weather: '晴れ', temperature: 22, humidity: '50', isAutoFetched: false },
-  coffee: { 
-    name: 'エチオピア', 
-    origin: 'エチオピア', 
-    process: 'ウォッシュド', 
-    variety: 'ゲイシャ', 
-    roastLevel: '浅煎り', 
-    roastedAt: new Date(), 
-    roastDate: '2024-06-01', 
-    otherInfo: '' 
-  },
-  brewing: { dripper: 'V60', grinder: 'Timemore', grindSize: '中細挽き', grindSetting: '', temperature: '92', coffeeAmount: '15', waterAmount: '240', bloomAmount: '', bloomTime: '', brewTime: '180', notes: '' },
-  tasting: { acidity: 4, sweetness: 4, richness: 3, body: 3, balance: 4, cleanliness: 4, aftertaste: 4, totalScore: 26 },
-  nose: { positive: {}, negative: {}, notes: '' },
-  aroma: { positive: {}, negative: {}, notes: '' },
-  personalScore: 90,
-  comments: '美味しかった',
-  notes: '',
-  created_at: '2024-06-01T10:00:00Z'
-};
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 export default function HanddripDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  // 本来はidでデータ取得
-  const record = dummyRecord;
+  const { id } = useParams();
+  const [record, setRecord] = useState<TastingRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const fetchRecord = async () => {
+      setLoading(true);
+      setError(null);
+      // handdrip_recordsから取得
+      const { data, error } = await supabase
+        .from('handdrip_records')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error || !data) {
+        setError('記録の取得に失敗しました');
+        setLoading(false);
+        return;
+      }
+      // environment/coffee参照
+      const [envRes, coffeeRes] = await Promise.all([
+        supabase.from('environments').select('*').eq('id', data.environment_id).single(),
+        supabase.from('coffees').select('*').eq('id', data.coffee_id).single(),
+      ]);
+      setRecord({
+        ...data,
+        environment: envRes.data || {},
+        coffee: coffeeRes.data || {},
+      });
+      setLoading(false);
+    };
+    if (id) fetchRecord();
+  }, [id]);
 
   const handleSubmit = async (data: TastingRecord) => {
     // 詳細表示時は何もしない
     return Promise.resolve();
   };
+
+  if (loading) return <div className="p-8 text-center">読み込み中...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (!record) return <div className="p-8 text-center">記録が見つかりません</div>;
 
   return (
     <div className="max-w-2xl mx-auto py-8">
@@ -44,7 +62,7 @@ export default function HanddripDetailPage({ params }: { params: { id: string } 
         <h1 className="text-2xl font-bold">ハンドドリップ記録 詳細</h1>
         <div className="flex space-x-2">
           <button
-            onClick={() => router.push(`/handdrip/${params.id}/edit`)}
+            onClick={() => router.push(`/handdrip/${id}/edit`)}
             className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             編集
@@ -57,7 +75,14 @@ export default function HanddripDetailPage({ params }: { params: { id: string } 
           </button>
         </div>
       </div>
-      <RecordForm initialData={record} onSubmit={handleSubmit} loading={false} error={null} mode="view" />
+      <RecordForm 
+        initialData={record} 
+        onSubmit={() => Promise.resolve()} 
+        loading={false} 
+        error={null} 
+        mode="view"
+        readOnly={true}
+      />
     </div>
   );
 } 

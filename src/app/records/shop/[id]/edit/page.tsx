@@ -7,60 +7,99 @@ import ShopVisitForm from "@/components/ShopVisitForm";
 import { createClient } from '@supabase/supabase-js';
 import { toSupabaseRow, fromSupabaseRow } from '@/utils/supabase';
 
-// ダミーデータ
-const dummyRecord: ShopVisitRecord = {
-  id: '1',
-  environment: {
-    date: '2024-06-01',
-    time: '14:00',
-    weather: '晴れ',
-    temperature: 25,
-    humidity: '50',
-    isAutoFetched: false,
-  },
-  shop: { name: 'カフェ・ド・サンプル', link: 'https://samplecafe.com' },
-  items: [
-    { name: 'エチオピアコーヒー', price: 600, origin: 'エチオピア', roastLevel: '浅煎り', variety: 'Heirloom', method: 'ハンドドリップ' },
-    { name: 'カフェラテ', price: 650, method: 'エスプレッソ' }
-  ],
-  tasting: {
-    acidity: 4,
-    sweetness: 3,
-    body: 4,
-    balance: 5,
-    richness: 4,
-    cleanliness: 4,
-    aftertaste: 3,
-    totalScore: 23,
-  },
-  comments: '明るい酸味と華やかな香りが印象的。店内も落ち着いた雰囲気で良かった。',
-  staffInfo: '店主はとても親切',
-  created_at: '2024-06-01T14:00:00Z',
-};
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 export default function ShopVisitEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const { id } = useParams();
   const [record, setRecord] = useState<ShopVisitRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setRecord(dummyRecord);
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const fetchRecord = async () => {
+      setLoading(true);
+      // shop_visits本体取得
+      const { data, error } = await supabase
+        .from('shop_visits')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error || !data) {
+        setRecord(null);
+        setLoading(false);
+        return;
+      }
+      // environment参照
+      let environment = undefined;
+      if (data.environment_id) {
+        const { data: envData } = await supabase
+          .from('environments')
+          .select('*')
+          .eq('id', data.environment_id)
+          .single();
+        environment = envData;
+      }
+      // fromSupabaseRowで変換し、environmentを上書き
+      const recordObj = fromSupabaseRow(data);
+      if (environment) {
+        recordObj.environment = {
+          date: environment.date,
+          time: environment.time,
+          weather: environment.weather,
+          temperature: environment.temperature,
+          humidity: environment.humidity,
+          isAutoFetched: environment.is_auto_fetched,
+        };
+      }
+      setRecord(recordObj);
     setLoading(false);
-  }, []);
+    };
+    fetchRecord();
+  }, [id]);
 
   const handleSubmit = async (data: ShopVisitRecord) => {
     setSaving(true);
-    // ダミー保存
-    setTimeout(() => {
-      setSaving(false);
+    setError(null);
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      // environmentsテーブル更新
+      const { data: envUpdateData, error: envError } = await supabase
+        .from('environments')
+        .update({
+          date: data.environment.date,
+          time: data.environment.time,
+          weather: data.environment.weather,
+          temperature: data.environment.temperature,
+          humidity: data.environment.humidity,
+          is_auto_fetched: data.environment.isAutoFetched,
+        })
+        .eq('id', (record as any)?.environment_id)
+        .select('id')
+        .single();
+      if (envError) throw envError;
+      // shop_visits本体更新
+      const row = toSupabaseRow(data);
+      const { error: shopError } = await supabase
+        .from('shop_visits')
+        .update({
+          ...row,
+          environment_id: envUpdateData.id,
+        })
+        .eq('id', id);
+      if (shopError) throw shopError;
       router.push('/records?tab=shop');
-    }, 500);
+    } catch (e: any) {
+      setError('保存に失敗しました: ' + (e.message || e.toString()));
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="p-8 text-center">読み込み中...</div>;
@@ -81,7 +120,7 @@ export default function ShopVisitEditPage({ params }: { params: { id: string } }
         initialData={record}
         onSubmit={handleSubmit}
         isSubmitting={saving}
-        submitError={null}
+        submitError={error}
         mode="edit"
       />
     </div>

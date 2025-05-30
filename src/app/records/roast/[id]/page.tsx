@@ -4,56 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { RoastRecord } from '@/types/roast';
 import RadarChart from '@/components/RadarChart';
-
-// ダミーデータ
-const dummyRoastRecords: RoastRecord[] = [
-  {
-    id: 'dummy3',
-    environment: {
-      date: '2024-06-01',
-      time: '10:00',
-      weather: '晴れ',
-      temperature: 25,
-      isAutoFetched: false,
-    },
-    coffee: {
-      name: 'ダミー豆',
-      origin: 'コロンビア',
-      process: 'ウォッシュド',
-      variety: 'カトゥーラ',
-      roastLevel: '中煎り',
-      roastDate: '2024-06-01',
-    },
-    brewing: {
-      dripper: '焙煎機',
-    },
-    tasting: {
-      acidity: 3,
-      sweetness: 4,
-      richness: 3,
-      body: 4,
-      balance: 4,
-      cleanliness: 3,
-      aftertaste: 3,
-      totalScore: 24,
-      aromaPowder: 3,
-      aromaPowderNote: 'ナッツ系',
-      aromaLiquid: 4,
-      aromaLiquidNote: 'フローラル',
-      flavor: 4,
-      flavorNote: 'チョコレート',
-      strength: 3,
-      uniformity: 4,
-      cleanness: 3,
-    },
-    nose: { positive: {}, negative: {}, notes: '' },
-    aroma: { positive: {}, negative: {}, notes: '' },
-    personalScore: 85,
-    comments: 'バランス良し',
-    notes: '',
-    created_at: '2024-06-01T10:00:00Z',
-  },
-];
+import { createClient } from '@supabase/supabase-js';
 
 export default function RoastRecordDetail() {
   const { id } = useParams();
@@ -63,14 +14,37 @@ export default function RoastRecordDetail() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // ダミーデータから取得
-    const found = dummyRoastRecords.find(r => r.id === id);
-    if (found) {
-      setRecord(found);
-    } else {
-      setError('記録が見つかりません');
-    }
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const fetchRecord = async () => {
+      setLoading(true);
+      setError(null);
+      // roast_recordsから取得
+      const { data, error } = await supabase
+        .from('roast_records')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error || !data) {
+        setError('記録の取得に失敗しました');
+        setLoading(false);
+        return;
+      }
+      // environment/coffee参照
+      const [envRes, coffeeRes] = await Promise.all([
+        supabase.from('environments').select('*').eq('id', data.environment_id).single(),
+        supabase.from('coffees').select('*').eq('id', data.coffee_id).single(),
+      ]);
+      setRecord({
+        ...data,
+        environment: envRes.data || {},
+        coffee: coffeeRes.data || {},
+      });
     setLoading(false);
+    };
+    fetchRecord();
   }, [id]);
 
   if (loading) return <div className="p-8 text-center">読み込み中...</div>;
@@ -79,15 +53,6 @@ export default function RoastRecordDetail() {
 
   // 日付フォーマット
   const formatDate = (date?: string) => date ? new Date(date).toLocaleDateString('ja-JP') : '-';
-  // 時間（秒 or mm:ss）
-  const formatTime = (value?: string | number | null) => {
-    if (value === undefined || value === null || value === '') return '-';
-    const num = typeof value === 'string' ? parseInt(value, 10) : value;
-    if (isNaN(num)) return value;
-    const minutes = Math.floor(num / 60);
-    const seconds = num % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-gray-50">
@@ -116,8 +81,28 @@ export default function RoastRecordDetail() {
           <div>
             <span className="block text-sm font-medium text-gray-700 mb-1">焙煎日</span>
             <div className="text-gray-900">
-              {formatDate(record.coffee.roastDate)}
+              {formatDate(record.roast_date)}
             </div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">場所</span>
+            <div className="text-gray-900">{record.environment?.location ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">気温</span>
+            <div className="text-gray-900">{record.environment?.temperature ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">湿度</span>
+            <div className="text-gray-900">{record.environment?.humidity ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">気圧</span>
+            <div className="text-gray-900">{record.environment?.pressure ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">メモ</span>
+            <div className="text-gray-900">{record.environment?.notes ?? '-'}</div>
           </div>
         </div>
       </section>
@@ -128,23 +113,35 @@ export default function RoastRecordDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <span className="block text-sm font-medium text-gray-700 mb-1">豆名</span>
-            <div className="text-gray-900">{record.coffee.name}</div>
+            <div className="text-gray-900">{record.coffee?.name ?? '-'}</div>
           </div>
           <div>
             <span className="block text-sm font-medium text-gray-700 mb-1">産地</span>
-            <div className="text-gray-900">{record.coffee.origin}</div>
+            <div className="text-gray-900">{record.coffee?.origin ?? '-'}</div>
           </div>
           <div>
             <span className="block text-sm font-medium text-gray-700 mb-1">品種</span>
-            <div className="text-gray-900">{record.coffee.variety}</div>
+            <div className="text-gray-900">{record.coffee?.variety ?? '-'}</div>
           </div>
           <div>
             <span className="block text-sm font-medium text-gray-700 mb-1">精製方法</span>
-            <div className="text-gray-900">{record.coffee.process}</div>
+            <div className="text-gray-900">{record.coffee?.process ?? '-'}</div>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">焙煎度</span>
-            <div className="text-gray-900">{record.coffee.roastLevel}</div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">農園</span>
+            <div className="text-gray-900">{record.coffee?.farm ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">標高</span>
+            <div className="text-gray-900">{record.coffee?.elevation ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">収穫日</span>
+            <div className="text-gray-900">{formatDate(record.coffee?.harvest_date)}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">メモ</span>
+            <div className="text-gray-900">{record.coffee?.notes ?? '-'}</div>
           </div>
         </div>
       </section>
@@ -154,18 +151,69 @@ export default function RoastRecordDetail() {
         <h2 className="text-xl font-semibold text-gray-900 mb-6">焙煎プロセス</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">投入量</span>
-            <div className="text-gray-900">{record.brewing.chargeWeight ?? '-'}</div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">焙煎度</span>
+            <div className="text-gray-900">{record.roast_level ?? '-'}</div>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">投入温度</span>
-            <div className="text-gray-900">{record.brewing.chargeTemp ?? '-'}</div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">焙煎時間（分）</span>
+            <div className="text-gray-900">{record.roast_time ?? '-'}</div>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">目標焙煎度</span>
-            <div className="text-gray-900">{record.brewing.targetRoastLevel ?? record.coffee.roastLevel ?? '-'}</div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">焙煎前重量（g）</span>
+            <div className="text-gray-900">{record.roast_weight_before ?? '-'}</div>
           </div>
-          {/* 必要に応じて他のプロセス項目も追加 */}
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">焙煎後重量（g）</span>
+            <div className="text-gray-900">{record.roast_weight_after ?? '-'}</div>
+          </div>
+          <div className="md:col-span-2">
+            <span className="block text-sm font-medium text-gray-700 mb-1">焙煎メモ</span>
+            <div className="text-gray-900 whitespace-pre-wrap">{record.roast_notes ?? '-'}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* 焙煎後の抽出 */}
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">焙煎後の抽出</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">抽出方法</span>
+            <div className="text-gray-900">{record.roast_brewing?.method ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">粉の粗さ</span>
+            <div className="text-gray-900">{record.roast_brewing?.grind_size ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">お湯の温度（℃）</span>
+            <div className="text-gray-900">{record.roast_brewing?.water_temp ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">粉水比</span>
+            <div className="text-gray-900">{record.roast_brewing?.ratio ?? '-'}</div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-gray-700 mb-1">抽出時間（秒）</span>
+            <div className="text-gray-900">{record.roast_brewing?.extraction_time ?? '-'}</div>
+          </div>
+          <div className="md:col-span-2">
+            <span className="block text-sm font-medium text-gray-700 mb-1">抽出メモ</span>
+            <div className="text-gray-900 whitespace-pre-wrap">{record.roast_brewing?.notes ?? '-'}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* 焙煎後のアロマ */}
+      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">焙煎後のアロマ</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Object.entries(record.roast_aroma || {}).map(([key, value]) => (
+            <div key={key}>
+              <span className="block text-sm font-medium text-gray-700 mb-1">{key}</span>
+              <div className="text-gray-900">{value}</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -176,57 +224,23 @@ export default function RoastRecordDetail() {
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">レーダーチャート</h3>
             <div className="h-96">
-              <RadarChart tasting={record.tasting} mode="roast" />
+              <RadarChart tasting={record.roast_tasting} mode="roast" />
             </div>
           </div>
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">香り（粉）</h3>
-              <div className="text-2xl font-bold text-gray-900 mb-1">{record.tasting.aromaPowder}</div>
-              {record.tasting.aromaPowderNote && (
-                <div className="text-gray-700">{record.tasting.aromaPowderNote}</div>
-              )}
+            {Object.entries(record.roast_tasting || {}).map(([key, value]) => (
+              key === 'notes' ? (
+                <div key={key}>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">メモ</h3>
+                  <div className="text-gray-700 whitespace-pre-wrap">{value}</div>
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">香り（液）</h3>
-              <div className="text-2xl font-bold text-gray-900 mb-1">{record.tasting.aromaLiquid}</div>
-              {record.tasting.aromaLiquidNote && (
-                <div className="text-gray-700">{record.tasting.aromaLiquidNote}</div>
-              )}
+              ) : (
+                <div key={key}>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">{key}</h3>
+                  <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">風味</h3>
-              <div className="text-2xl font-bold text-gray-900 mb-1">{record.tasting.flavor}</div>
-              {record.tasting.flavorNote && (
-                <div className="text-gray-700">{record.tasting.flavorNote}</div>
-              )}
-            </div>
-            {/* 他のテイスティング項目も同様に表示可能 */}
-          </div>
-        </div>
-      </section>
-
-      {/* 総合評価 */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">総合評価</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="mb-4">
-              <span className="block text-sm font-medium text-gray-700 mb-1">評価点数</span>
-              <div className="text-3xl font-bold text-gray-900">{record.tasting.totalScore}</div>
-            </div>
-            <div>
-              <span className="block text-sm font-medium text-gray-700 mb-1">個人スコア</span>
-              <div className="text-3xl font-bold text-gray-900">{record.personalScore}</div>
-            </div>
-          </div>
-          <div>
-            {record.comments && (
-              <div className="mb-4">
-                <span className="block text-sm font-medium text-gray-700 mb-1">コメント</span>
-                <div className="text-gray-900 whitespace-pre-wrap">{record.comments}</div>
-              </div>
-            )}
+              )
+            ))}
           </div>
         </div>
       </section>

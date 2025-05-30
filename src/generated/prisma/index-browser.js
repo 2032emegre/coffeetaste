@@ -120,18 +120,90 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.RoastRecordScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  bean_name: 'bean_name',
+  origin: 'origin',
+  process: 'process',
+  variety: 'variety',
+  roast_date: 'roast_date',
+  weight: 'weight',
+  charge_weight: 'charge_weight',
+  temperature: 'temperature',
+  humidity: 'humidity',
+  pressure: 'pressure',
+  altitude: 'altitude',
+  charge_temp: 'charge_temp',
+  moisture: 'moisture',
+  after_weight: 'after_weight',
+  drop_temp: 'drop_temp',
+  color: 'color',
+  first_crack: 'first_crack',
+  second_crack: 'second_crack',
+  total_time: 'total_time',
+  acidity: 'acidity',
+  sweetness: 'sweetness',
+  bitterness: 'bitterness',
+  body: 'body',
+  balance: 'balance',
+  nose_intensity: 'nose_intensity',
+  aroma_intensity: 'aroma_intensity',
+  personal_score: 'personal_score',
+  overall_total_score: 'overall_total_score',
+  comments: 'comments',
+  notes: 'notes',
+  is_deleted: 'is_deleted',
+  user_id: 'user_id'
+};
+
 exports.Prisma.TastingRecordScalarFieldEnum = {
   id: 'id',
-  coffeeName: 'coffeeName',
+  coffee_name: 'coffee_name',
   score: 'score',
   notes: 'notes',
   altitude: 'altitude',
-  createdAt: 'createdAt'
+  created_at: 'created_at',
+  user_id: 'user_id'
+};
+
+exports.Prisma.ShopVisitScalarFieldEnum = {
+  id: 'id',
+  environment: 'environment',
+  shop: 'shop',
+  items: 'items',
+  tasting: 'tasting',
+  comments: 'comments',
+  staff_info: 'staff_info',
+  created_at: 'created_at',
+  user_id: 'user_id'
+};
+
+exports.Prisma.EspressoRecordScalarFieldEnum = {
+  id: 'id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  coffee: 'coffee',
+  environment: 'environment',
+  brewing: 'brewing',
+  crema: 'crema',
+  tasting: 'tasting',
+  nose: 'nose',
+  aroma: 'aroma',
+  personal_score: 'personal_score',
+  comments: 'comments',
+  is_deleted: 'is_deleted',
+  user_id: 'user_id'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -144,9 +216,18 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
-  TastingRecord: 'TastingRecord'
+  RoastRecord: 'RoastRecord',
+  TastingRecord: 'TastingRecord',
+  ShopVisit: 'ShopVisit',
+  EspressoRecord: 'EspressoRecord'
 };
 
 /**

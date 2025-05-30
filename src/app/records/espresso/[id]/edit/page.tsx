@@ -6,8 +6,9 @@ import EnvironmentInfo from '@/components/EnvironmentInfo';
 import CoffeeInfo from '@/components/CoffeeInfo';
 import AromaSection from '@/components/AromaSection';
 import RadarChart from '@/components/RadarChart';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EspressoForm from '@/components/EspressoForm';
+import { createClient } from '@supabase/supabase-js';
 
 // ダミーデータ（Supabase espresso_recordsに準拠）
 const dummyRecord: EspressoRecord = {
@@ -27,13 +28,112 @@ const dummyRecord: EspressoRecord = {
 
 export default function EspressoEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [record, setRecord] = useState<EspressoRecord>(dummyRecord);
+  const [record, setRecord] = useState<EspressoRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const fetchRecord = async () => {
+      setLoading(true);
+      setError(null);
+      // espresso_recordsから取得
+      const { data, error } = await supabase
+        .from('espresso_records')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+      if (error || !data) {
+        setError('記録の取得に失敗しました');
+        setLoading(false);
+        return;
+      }
+      // environment/coffee参照
+      const [envRes, coffeeRes] = await Promise.all([
+        supabase.from('environments').select('*').eq('id', data.environment_id).single(),
+        supabase.from('coffees').select('*').eq('id', data.coffee_id).single(),
+      ]);
+      setRecord({
+        ...data,
+        environment: envRes.data || {},
+        coffee: coffeeRes.data || {},
+      });
+      setLoading(false);
+    };
+    fetchRecord();
+  }, [params.id]);
 
   const handleSubmit = async (data: EspressoRecord) => {
-    // 編集時の処理をここに実装（現状はダミー）
-    // 更新後、元のカード一覧に戻る
-    router.back();
+    setSaving(true);
+    setError(null);
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    try {
+      // environment/coffeeをupdate
+      await supabase.from('environments').update({
+        date: data.environment.date,
+        time: data.environment.time,
+        weather: data.environment.weather,
+        temperature: data.environment.temperature,
+        humidity: data.environment.humidity,
+        is_auto_fetched: data.environment.isAutoFetched,
+      }).eq('id', (record as any).environment_id);
+      await supabase.from('coffees').update({
+        name: data.coffee.name,
+        origin: data.coffee.origin,
+        process: data.coffee.process,
+        variety: data.coffee.variety,
+        roast_level: data.coffee.roastLevel,
+        roasted_at: data.coffee.roastedAt,
+        roast_date: data.coffee.roastDate,
+        other_info: data.coffee.otherInfo,
+      }).eq('id', (record as any).coffee_id);
+      // espresso_records本体をupdate
+      const { error } = await supabase.from('espresso_records').update({
+        brewing: data.brewing,
+        crema: data.crema,
+        tasting: data.tasting,
+        nose: data.nose,
+        aroma: data.aroma,
+        personalScore: data.personalScore,
+        comments: data.comments,
+        notes: data.notes,
+      }).eq('id', params.id);
+      setSaving(false);
+      if (error) {
+        setError('保存に失敗しました: ' + error.message);
+        return;
+      }
+      router.push('/records/espresso');
+    } catch (e: any) {
+      setSaving(false);
+      setError('保存に失敗しました: ' + (e.message || ''));
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto py-8">
+        <div className="text-center text-gray-500">読み込み中...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto py-8">
+        <div className="text-center text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  if (!record) return <div className="p-8 text-center">記録が見つかりません</div>;
 
   const cremaTasting = {
     acidity: record.crema.color,

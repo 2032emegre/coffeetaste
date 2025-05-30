@@ -23,8 +23,9 @@ export default function RecordDetail() {
   useEffect(() => {
     const fetchRecord = async () => {
       setLoading(true);
+      // handdrip_recordsから取得
       const { data, error } = await supabase
-        .from('tasting_records')
+        .from('handdrip_records')
         .select('*')
         .eq('id', id)
         .single();
@@ -33,7 +34,16 @@ export default function RecordDetail() {
         setLoading(false);
         return;
       }
-      setRecord(data);
+      // environment/coffee参照
+      const [envRes, coffeeRes] = await Promise.all([
+        supabase.from('environments').select('*').eq('id', data.environment_id).single(),
+        supabase.from('coffees').select('*').eq('id', data.coffee_id).single(),
+      ]);
+      setRecord({
+        ...data,
+        environment: envRes.data || {},
+        coffee: coffeeRes.data || {},
+      });
       setLoading(false);
     };
     if (id) fetchRecord();
@@ -43,7 +53,7 @@ export default function RecordDetail() {
     // 詳細表示モードでは変更を無視
   };
 
-  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative', key: string, value: boolean | string) => {
+  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative' | 'notes', key: string, value: boolean | string) => {
     // 詳細表示モードでは変更を無視
   };
 

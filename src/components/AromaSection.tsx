@@ -3,8 +3,12 @@ import { TastingRecord } from '@/types/tasting';
 type AromaSectionProps = {
   type: 'nose' | 'aroma';
   formData: TastingRecord;
-  onChange: (type: 'nose' | 'aroma', field: 'positive' | 'negative', key: string, value: boolean | string) => void;
+  onChange: (type: 'nose' | 'aroma', field: 'positive' | 'negative' | 'notes', key: string, value: boolean | string) => void;
   mode?: 'new' | 'edit' | 'view';
+  positiveOtherNote: string;
+  onPositiveOtherNoteChange: (value: string) => void;
+  negativeOtherNote: string;
+  onNegativeOtherNoteChange: (value: string) => void;
 };
 
 const positiveAromas = [
@@ -25,7 +29,7 @@ const negativeAromas = [
   { key: 'woody', label: '樹木' },
 ] as const;
 
-export default function AromaSection({ type, formData, onChange, mode = 'new' }: AromaSectionProps) {
+export default function AromaSection({ type, formData, onChange, mode = 'new', positiveOtherNote, onPositiveOtherNoteChange, negativeOtherNote, onNegativeOtherNoteChange }: AromaSectionProps) {
   const isViewMode = mode === 'view';
   const title = type === 'nose' ? 'LE NEZ（香り）' : 'LES ARÔMES（アロマ）';
   const data = type === 'nose' ? formData.nose : formData.aroma;
@@ -39,19 +43,22 @@ export default function AromaSection({ type, formData, onChange, mode = 'new' }:
   };
 
   const handleNotesChange = (value: string) => {
-    onChange(type, 'positive', 'notes', value);
+    onChange(type, 'notes', '', value);
   };
 
   const renderAromaList = (field: 'positive' | 'negative', aromas: typeof positiveAromas | typeof negativeAromas) => {
+    const isPositive = field === 'positive';
+    const otherNote = isPositive ? positiveOtherNote : negativeOtherNote;
+    const onOtherNoteChange = isPositive ? onPositiveOtherNoteChange : onNegativeOtherNoteChange;
     if (isViewMode) {
       const selectedAromas = aromas
         .filter(aroma => data[field][aroma.key])
         .map(aroma => aroma.label);
-      const other = data[field].other;
+      const otherChecked = !!data[field].other;
       return (
         <div className="text-gray-900">
           {selectedAromas.length > 0 ? selectedAromas.join('、') : 'なし'}
-          {other && `、その他: ${other}`}
+          {otherChecked && otherNote && `、その他: ${otherNote}`}
         </div>
       );
     }
@@ -69,12 +76,21 @@ export default function AromaSection({ type, formData, onChange, mode = 'new' }:
             <span className="ml-2 text-sm text-gray-700">{aroma.label}</span>
           </label>
         ))}
-        <div className="col-span-full mt-2">
+        <label className="inline-flex items-center col-span-full mt-2">
+          <input
+            type="checkbox"
+            checked={Boolean(data[field].other)}
+            onChange={(e) => handleCheckboxChange(field, 'other', e.target.checked)}
+            className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-500 focus:ring-gray-500"
+          />
+          <span className="ml-2 text-sm text-gray-700">その他</span>
+        </label>
+        <div className="col-span-full mt-1">
           <input
             type="text"
-            placeholder="その他"
-            value={String(data[field].other || '')}
-            onChange={(e) => handleOtherChange(field, e.target.value)}
+            placeholder="その他の内容"
+            value={otherNote}
+            onChange={(e) => onOtherNoteChange(e.target.value)}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
           />
         </div>
@@ -83,32 +99,27 @@ export default function AromaSection({ type, formData, onChange, mode = 'new' }:
   };
 
   return (
-    <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">{title}</h2>
-      <div className="space-y-6">
+    <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+      <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-base font-medium text-gray-900 mb-4">ポジティブ</h3>
+          <div className="font-semibold text-gray-700 mb-1">ポジティブ</div>
           {renderAromaList('positive', positiveAromas)}
         </div>
         <div>
-          <h3 className="text-base font-medium text-gray-900 mb-4">ネガティブ</h3>
+          <div className="font-semibold text-gray-700 mb-1">ネガティブ</div>
           {renderAromaList('negative', negativeAromas)}
         </div>
+        </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ノート
-          </label>
-          {isViewMode ? (
-            <div className="text-gray-900">{data.notes || 'なし'}</div>
-          ) : (
+        <label className="block text-sm font-medium text-gray-700 mb-1">ノート</label>
             <textarea
-              value={data.notes || ''}
+          value={data.notes ?? ''}
               onChange={(e) => handleNotesChange(e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
               rows={3}
+          placeholder="ノートを入力してください"
             />
-          )}
-        </div>
       </div>
     </section>
   );

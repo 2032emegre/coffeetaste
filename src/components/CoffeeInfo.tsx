@@ -68,7 +68,7 @@ type CoffeeHistory = {
   variety: string;
   roastLevel: string;
   roastDate: string;
-  otherInfo: string;
+  other_info: string;
   count: number;
   altitude?: number;
 };
@@ -86,9 +86,8 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
   // コーヒー履歴の取得
   const fetchCoffeeHistories = useCallback(async () => {
     const { data, error } = await supabase
-      .from('tasting_records')
-      .select('coffee')
-      .not('coffee', 'is', null);
+      .from('coffees')
+      .select('*');
 
     if (error) {
       console.error('コーヒー履歴の取得に失敗:', error);
@@ -97,10 +96,8 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
 
     // コーヒー情報を集計
     const historyMap = new Map<string, CoffeeHistory>();
-    data.forEach((record: any) => {
-      const coffee = record.coffee;
+    data.forEach((coffee: any) => {
       if (!coffee?.name) return;
-
       const key = `${coffee.name}-${coffee.origin}-${coffee.process}-${coffee.variety}`;
       if (historyMap.has(key)) {
         const existing = historyMap.get(key)!;
@@ -111,9 +108,9 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
           origin: coffee.origin || '',
           process: coffee.process || '',
           variety: coffee.variety || '',
-          roastLevel: coffee.roastLevel || '',
-          roastDate: coffee.roastDate || '',
-          otherInfo: coffee.otherInfo || '',
+          roastLevel: coffee.roast_level || '',
+          roastDate: coffee.roast_date || '',
+          other_info: coffee.other_info || '',
           count: 1,
           altitude: coffee.altitude,
         });
@@ -169,7 +166,7 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
     onChange('variety', history.variety);
     onChange('roastLevel', history.roastLevel);
     onChange('roastDate', history.roastDate);
-    onChange('otherInfo', history.otherInfo);
+    onChange('other_info', history.other_info);
     if (history.altitude !== undefined) {
       onChange('altitude', history.altitude);
     }
@@ -406,12 +403,12 @@ export default function CoffeeInfo({ formData, onChange, mode = 'new' }: CoffeeI
             その他の情報
           </label>
           {isViewMode ? (
-            <div className="text-gray-900">{formData.coffee.otherInfo}</div>
+            <div className="text-gray-900">{formData.coffee.other_info}</div>
           ) : (
             <input
               type="text"
-              value={formData.coffee.otherInfo}
-              onChange={(e) => onChange('otherInfo', e.target.value)}
+              value={formData.coffee.other_info}
+              onChange={(e) => onChange('other_info', e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
             />
           )}

@@ -7,26 +7,53 @@ import CoffeeInfo from '@/components/CoffeeInfo';
 import AromaSection from '@/components/AromaSection';
 import RadarChart from '@/components/RadarChart';
 import EspressoForm from '@/components/EspressoForm';
-
-// ダミーデータ（Supabase espresso_recordsに準拠）
-const dummyRecord: EspressoRecord = {
-  id: '1',
-  environment: { date: '2025-05-21', time: '10:00', weather: '晴れ', temperature: 22, humidity: '50%', isAutoFetched: false },
-  coffee: { name: 'CarlosAndres', origin: 'コロンビア', process: 'FullyWashed', variety: 'castillo', roastLevel: '中煎り', roastedAt: new Date(), roastDate: '2025-05-15', otherInfo: '' },
-  brewing: { type: 'espresso', dripper: '', grinder: 'Timemore', grindSetting: '2.5', coffeeAmount: '18', yield: '36', brewTime: '0:30', temperature: '93', pressure: '9', notes: '良い抽出', flair: false, flairMemo: '' },
-  crema: { color: 4, thickness: 4, persistence: 4, notes: 'きれいなクレマ' },
-  tasting: { acidity: 4, sweetness: 4, richness: 4, body: 4, balance: 4, cleanliness: 4, aftertaste: 4, totalScore: 31 },
-  nose: { positive: {}, negative: {}, notes: '' },
-  aroma: { positive: {}, negative: {}, notes: '' },
-  personalScore: 88,
-  comments: 'バランス良し',
-  notes: '',
-  created_at: '2025-05-21T10:00:00Z',
-};
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 export default function EspressoDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const record = dummyRecord; // 本来はidで取得
+  const [record, setRecord] = useState<EspressoRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const fetchRecord = async () => {
+      setLoading(true);
+      setError(null);
+      // espresso_recordsから取得
+      const { data, error } = await supabase
+        .from('espresso_records')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+      if (error || !data) {
+        setError('記録の取得に失敗しました');
+        setLoading(false);
+        return;
+      }
+      // environment/coffee参照
+      const [envRes, coffeeRes] = await Promise.all([
+        supabase.from('environments').select('*').eq('id', data.environment_id).single(),
+        supabase.from('coffees').select('*').eq('id', data.coffee_id).single(),
+      ]);
+      setRecord({
+        ...data,
+        environment: envRes.data || {},
+        coffee: coffeeRes.data || {},
+      });
+      setLoading(false);
+    };
+    fetchRecord();
+  }, [params.id]);
+
+  if (loading) return <div className="p-8 text-center">読み込み中...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (!record) return <div className="p-8 text-center">記録が見つかりません</div>;
+
   const cremaTasting = {
     acidity: record.crema.color,
     sweetness: record.crema.thickness,

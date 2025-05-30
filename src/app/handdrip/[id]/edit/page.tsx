@@ -1,45 +1,118 @@
 "use client";
 
 import RecordForm from '@/components/RecordForm';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { TastingRecord } from '@/types/tasting';
-
-// 仮のダミーデータ
-const dummyRecord: TastingRecord = {
-  id: '1',
-  environment: { date: '2024-06-01', time: '10:00', weather: '晴れ', temperature: 22, humidity: '50', isAutoFetched: false },
-  coffee: { 
-    name: 'エチオピア', 
-    origin: 'エチオピア', 
-    process: 'ウォッシュド', 
-    variety: 'ゲイシャ', 
-    roastLevel: '浅煎り', 
-    roastedAt: new Date(), 
-    roastDate: '2024-06-01', 
-    otherInfo: '' 
-  },
-  brewing: { dripper: 'V60', grinder: 'Timemore', grindSize: '中細挽き', grindSetting: '', temperature: '92', coffeeAmount: '15', waterAmount: '240', bloomAmount: '', bloomTime: '', brewTime: '180', notes: '' },
-  tasting: { acidity: 4, sweetness: 4, richness: 3, body: 3, balance: 4, cleanliness: 4, aftertaste: 4, totalScore: 26 },
-  nose: { positive: {}, negative: {}, notes: '' },
-  aroma: { positive: {}, negative: {}, notes: '' },
-  personalScore: 90,
-  comments: '美味しかった',
-  notes: '',
-  created_at: '2024-06-01T10:00:00Z'
-};
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 export default function HanddripEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  // 本来はidでデータ取得
-  const record = dummyRecord;
+  const { id } = useParams();
+  const [record, setRecord] = useState<TastingRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const fetchRecord = async () => {
+      setLoading(true);
+      setError(null);
+      // handdrip_recordsから取得
+      const { data, error } = await supabase
+        .from('handdrip_records')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error || !data) {
+        setError('記録の取得に失敗しました');
+        setLoading(false);
+        return;
+      }
+      // environment/coffee参照
+      const [envRes, coffeeRes] = await Promise.all([
+        supabase.from('environments').select('*').eq('id', data.environment_id).single(),
+        supabase.from('coffees').select('*').eq('id', data.coffee_id).single(),
+      ]);
+      setRecord({
+        ...data,
+        environment: envRes.data || {},
+        coffee: coffeeRes.data || {},
+      });
+      setLoading(false);
+    };
+    if (id) fetchRecord();
+  }, [id]);
 
   const handleSubmit = async (data: TastingRecord) => {
-    // 編集時の処理をここに実装
-    console.log('編集データ:', data);
-    // 更新後、カード一覧に戻る
-    router.push('/records');
-    return Promise.resolve();
+    setSaving(true);
+    setError(null);
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      // environmentsテーブル更新
+      const { error: envError } = await supabase
+        .from('environments')
+        .update({
+          date: data.environment.date,
+          time: data.environment.time,
+          weather: data.environment.weather,
+          temperature: data.environment.temperature,
+          humidity: data.environment.humidity,
+          is_auto_fetched: data.environment.isAutoFetched,
+        })
+        .eq('id', record?.environment_id);
+      if (envError) throw envError;
+
+      // coffeesテーブル更新
+      const { error: coffeeError } = await supabase
+        .from('coffees')
+        .update({
+          name: data.coffee.name,
+          origin: data.coffee.origin,
+          process: data.coffee.process,
+          variety: data.coffee.variety,
+          roast_level: data.coffee.roastLevel,
+          roast_date: data.coffee.roastDate,
+          altitude: data.coffee.altitude,
+          other_info: data.coffee.other_info,
+        })
+        .eq('id', record?.coffee_id);
+      if (coffeeError) throw coffeeError;
+
+      // handdrip_records本体をupdate
+      const { error: recordError } = await supabase
+        .from('handdrip_records')
+        .update({
+          brewing: data.brewing,
+          tasting: data.tasting,
+          nose: data.nose,
+          aroma: data.aroma,
+          personal_score: data.personal_score,
+          comments: data.comments,
+          notes: data.notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+      if (recordError) throw recordError;
+
+      router.push('/records');
+    } catch (e: any) {
+      setError('保存に失敗しました: ' + (e.message || e.toString()));
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) return <div className="p-8 text-center">読み込み中...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (!record) return <div className="p-8 text-center">記録が見つかりません</div>;
 
   return (
     <div className="max-w-2xl mx-auto py-8">
@@ -52,7 +125,7 @@ export default function HanddripEditPage({ params }: { params: { id: string } })
           キャンセル
         </button>
       </div>
-      <RecordForm initialData={record} onSubmit={handleSubmit} loading={false} error={null} mode="edit" />
+      <RecordForm initialData={record} onSubmit={handleSubmit} loading={saving} error={error} mode="edit" />
     </div>
   );
 } 

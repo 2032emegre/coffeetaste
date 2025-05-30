@@ -68,7 +68,7 @@ function calculateChartPoints(tasting: Required<TastingRecord['tasting']>, size:
   const angleStep = (2 * Math.PI) / 7;
   
   return TASTING_FIELDS.map((item, i) => {
-    const value = tasting[item.key] / 5;
+    const value = (tasting[item.key] as number) / 5;
     const angle = i * angleStep - Math.PI / 2;
     return {
       x: center + radius * value * Math.cos(angle),
@@ -188,7 +188,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function RecordList() {
-  const [records, setRecords] = useState<Partial<TastingRecord>[]>([]);
+  const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<'personalScore' | 'date' | 'score'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -351,6 +351,21 @@ export default function RecordList() {
           .order('created_at', { ascending: false });
         data = res.data;
         error = res.error;
+        if (data && data.length > 0) {
+          const environmentIds = data.map((r: any) => r.environment_id).filter(Boolean);
+          const coffeeIds = data.map((r: any) => r.coffee_id).filter(Boolean);
+          const [envRes, coffeeRes] = await Promise.all([
+            supabase.from('environments').select('*').in('id', environmentIds),
+            supabase.from('coffees').select('*').in('id', coffeeIds),
+          ]);
+          const envMap = Object.fromEntries((envRes.data || []).map((e: any) => [e.id, e]));
+          const coffeeMap = Object.fromEntries((coffeeRes.data || []).map((c: any) => [c.id, c]));
+          data = data.map((r: any) => ({
+            ...r,
+            environment: envMap[r.environment_id] || {},
+            coffee: coffeeMap[r.coffee_id] || {},
+          }));
+        }
       } else if (recordType === 'handdrip') {
         // ハンドドリップ記録を取得
         const res = await supabase
@@ -359,6 +374,21 @@ export default function RecordList() {
           .order('created_at', { ascending: false });
         data = res.data;
         error = res.error;
+        if (data && data.length > 0) {
+          const environmentIds = data.map((r: any) => r.environment_id).filter(Boolean);
+          const coffeeIds = data.map((r: any) => r.coffee_id).filter(Boolean);
+          const [envRes, coffeeRes] = await Promise.all([
+            supabase.from('environments').select('*').in('id', environmentIds),
+            supabase.from('coffees').select('*').in('id', coffeeIds),
+          ]);
+          const envMap = Object.fromEntries((envRes.data || []).map((e: any) => [e.id, e]));
+          const coffeeMap = Object.fromEntries((coffeeRes.data || []).map((c: any) => [c.id, c]));
+          data = data.map((r: any) => ({
+            ...r,
+            environment: envMap[r.environment_id] || {},
+            coffee: coffeeMap[r.coffee_id] || {},
+          }));
+        }
       } else if (recordType === 'roast') {
         // 焙煎記録を取得
         const res = await supabase
@@ -367,8 +397,39 @@ export default function RecordList() {
           .order('roast_date', { ascending: false });
         data = res.data;
         error = res.error;
+        if (data && data.length > 0) {
+          const environmentIds = data.map((r: any) => r.environment_id).filter(Boolean);
+          const coffeeIds = data.map((r: any) => r.coffee_id).filter(Boolean);
+          const [envRes, coffeeRes] = await Promise.all([
+            supabase.from('environments').select('*').in('id', environmentIds),
+            supabase.from('coffees').select('*').in('id', coffeeIds),
+          ]);
+          const envMap = Object.fromEntries((envRes.data || []).map((e: any) => [e.id, e]));
+          const coffeeMap = Object.fromEntries((coffeeRes.data || []).map((c: any) => [c.id, c]));
+          data = data.map((r: any) => ({
+            ...r,
+            environment: envMap[r.environment_id] || {},
+            coffee: coffeeMap[r.coffee_id] || {},
+          }));
+        }
+      } else if (recordType === 'shop') {
+        // 店舗来店記録を取得
+        const res = await supabase
+          .from('shop_visits')
+          .select('*')
+          .order('created_at', { ascending: false });
+        data = res.data;
+        error = res.error;
+        if (data && data.length > 0) {
+          const environmentIds = data.map((r: any) => r.environment_id).filter(Boolean);
+          const envRes = await supabase.from('environments').select('*').in('id', environmentIds);
+          const envMap = Object.fromEntries((envRes.data || []).map((e: any) => [e.id, e]));
+          data = data.map((r: any) => ({
+            ...r,
+            environment: envMap[r.environment_id] || {},
+          }));
+        }
       } else {
-        // その他（shop）は現状何もしない
         setLoading(false);
         return;
       }
@@ -402,8 +463,14 @@ export default function RecordList() {
         return false;
       }
       return true;
+    } else if (recordType === 'shop') {
+      // ShopVisitRecord型のフィルタ処理
+      if (searchName && !(record.shop?.name || '').toLowerCase().includes(searchName.toLowerCase())) {
+        return false;
+      }
+      return true;
     } else {
-      // handdrip/espresso/shopも同様
+      // handdrip/espressoのみ
       const tastingRecord = record;
       if (searchName && !(tastingRecord.coffee?.name || '').toLowerCase().includes(searchName.toLowerCase())) {
         return false;
@@ -680,7 +747,15 @@ export default function RecordList() {
                     } else if (recordType === 'shop') {
                       return <ShopCard key={record.id} record={record} />;
                     } else {
-                      return <HanddripCard key={record.id} record={record as Partial<TastingRecord>} />;
+                      return (
+                        <HanddripCard
+                          key={record.id}
+                          record={record as Partial<TastingRecord>}
+                          onDelete={(id) => {
+                            setRecords(records.filter(r => r.id !== id));
+                          }}
+                        />
+                      );
                     }
                   })}
                 </div>

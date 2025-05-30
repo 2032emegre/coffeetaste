@@ -1,51 +1,46 @@
+import { Environment } from '@/types/environment';
+import { Coffee } from '@/types/coffee';
+
 export type RoastRecord = {
   id: string;
+  user_id: string;
+  environment_id: string;
+  coffee_id: string;
   created_at: string;
+  updated_at: string;
   roast_date: string;
-  bean_name: string;
-  origin: string;
-  process: string;
-  variety: string;
   roast_level: string;
-  other_info?: string;
-  // 焙煎前
-  charge_weight: number;
-  charge_temp: number;
-  target_roast_level: string;
-  // 焙煎後・工程
-  charge_time: string;
-  dry_end: string;
-  yellow_start: string;
-  maillard_start: string;
-  first_crack: string;
-  first_crack_peak: string;
-  second_crack: string;
-  drop_time: string;
-  total_time: string;
-  drop_temp: number;
-  after_weight: number;
-  color: number;
-  // テイスティング
+  roast_time: number;
+  roast_weight_before: number;
+  roast_weight_after: number;
+  roast_notes: string;
+  roast_aroma: {
+    floral: number;
+    fruity: number;
+    sour: number;
+    sweet: number;
+    bitter: number;
+    body: number;
+    aftertaste: number;
+  };
+  roast_brewing: {
+    method: string;
+    grind_size: string;
+    water_temp: number;
+    ratio: number;
+    extraction_time: number;
+    notes: string;
+  };
+  roast_tasting: {
   acidity: number;
   sweetness: number;
-  richness: number;
+    bitterness: number;
   body: number;
+    aftertaste: number;
   balance: number;
-  cleanliness: number;
-  aftertaste: number;
-  total_score: number;
-  aroma_powder: number;
-  aroma_powder_note?: string;
-  aroma_liquid: number;
-  aroma_liquid_note?: string;
-  flavor: number;
-  flavor_note?: string;
-  strength: number;
-  uniformity: number;
-  cleanness: number;
-  // 総合評価
-  overall_total_score: number;
-  personal_score: number;
-  issues?: string;
-  summary?: string;
+    overall: number;
+    notes: string;
+  };
+  environment: Environment;
+  coffee: Coffee;
 }; 

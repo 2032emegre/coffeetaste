@@ -1,5 +1,7 @@
 export interface TastingRecord {
     id: string;
+    environment_id?: string;
+    coffee_id?: string;
     timestamp?: Date;
     environment: {
         date: string;
@@ -19,8 +21,8 @@ export interface TastingRecord {
         roastLevel?: string;
         roastedAt?: Date;
         roastDate?: string;
-        altitude?: number;         // 標高（メートル）
-        otherInfo?: string;
+        altitude?: number | null;         // 標高（メートル）
+        other_info?: string;
     };
     brewing: {
         dripper: string;
@@ -55,19 +57,25 @@ export interface TastingRecord {
         cleanness: number;          // 1-5 カップの綺麗さ
     };
     nose: {
-        positive: { [key: string]: boolean | string };
-        negative: { [key: string]: boolean | string };
+        positive: Record<string, boolean>;
+        negative: Record<string, boolean>;
         notes: string;
+        positive_other_note?: string;
+        negative_other_note?: string;
     };
     aroma: {
-        positive: { [key: string]: boolean | string };
-        negative: { [key: string]: boolean | string };
+        positive: Record<string, boolean>;
+        negative: Record<string, boolean>;
         notes: string;
+        positive_other_note?: string;
+        negative_other_note?: string;
     };
-    personalScore: number;  // 100点満点
+    personal_score: number;  // 100点満点
     comments: string;
     notes: string;
     created_at?: string;
+    nose_other_note?: string;
+    aroma_other_note?: string;
 }
 
 // 店舗来店記録用の型
@@ -137,7 +145,7 @@ export type EspressoRecord = {
     roastLevel?: string;
     roastedAt?: Date;
     roastDate?: string;
-    otherInfo?: string;
+    other_info?: string;
   };
   brewing: {
     type: string;
@@ -180,16 +188,16 @@ export type EspressoRecord = {
     cleanness?: number;
   };
   nose: {
-    positive: { [key: string]: boolean | string };
-    negative: { [key: string]: boolean | string };
+    positive: Record<string, boolean>;
+    negative: Record<string, boolean>;
     notes: string;
   };
   aroma: {
-    positive: { [key: string]: boolean | string };
-    negative: { [key: string]: boolean | string };
+    positive: Record<string, boolean>;
+    negative: Record<string, boolean>;
     notes: string;
   };
-  personalScore: number;
+  personal_score: number;
   comments: string;
   notes?: string;
   created_at?: string;

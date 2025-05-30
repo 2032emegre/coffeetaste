@@ -1,18 +1,100 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["public", "auth"]
+}
+
+model RoastRecord {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updated_at          DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  bean_name           String    @map("bean_name")
+  origin              String?
+  process             String?
+  variety             String?
+  roast_date          DateTime  @map("roast_date")
+  weight              Float?
+  charge_weight       Float?    @map("charge_weight")
+  temperature         Float?
+  humidity            Float?
+  pressure            Float?
+  altitude            Float?
+  charge_temp         Float?    @map("charge_temp")
+  moisture            Float?
+  after_weight        Float?    @map("after_weight")
+  drop_temp           Float?    @map("drop_temp")
+  color               Float?
+  first_crack         DateTime? @map("first_crack") @db.Timestamptz
+  second_crack        DateTime? @map("second_crack") @db.Timestamptz
+  total_time          Float?    @map("total_time")
+  acidity             Float?
+  sweetness           Float?
+  bitterness          Float?
+  body                Float?
+  balance             Float?
+  nose_intensity      Float?    @map("nose_intensity")
+  aroma_intensity     Float?    @map("aroma_intensity")
+  personal_score      Float?    @map("personal_score")
+  overall_total_score Float?    @map("overall_total_score")
+  comments            String?
+  notes               String?
+  is_deleted          Boolean   @default(false) @map("is_deleted")
+  user_id             String?   @map("user_id") @db.Uuid
+
+  @@map("roast_records")
+  @@schema("public")
 }
 
 model TastingRecord {
-  id         Int      @id @default(autoincrement())
-  coffeeName String
-  score      Int
-  notes      String?
-  altitude   Int? // 標高（メートル）
-  createdAt  DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  coffee_name String   @map("coffee_name")
+  score       Int
+  notes       String?
+  altitude    Int?
+  created_at  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  user_id     String?  @map("user_id") @db.Uuid
+
+  @@map("tasting_records")
+  @@schema("public")
+}
+
+model ShopVisit {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  environment Json     @db.JsonB
+  shop        Json     @db.JsonB
+  items       Json     @db.JsonB
+  tasting     Json     @db.JsonB
+  comments    String?
+  staff_info  String?  @map("staff_info")
+  created_at  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  user_id     String?  @map("user_id") @db.Uuid
+
+  @@map("shop_visits")
+  @@schema("public")
+}
+
+model EspressoRecord {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updated_at     DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  coffee         Json     @db.JsonB
+  environment    Json     @db.JsonB
+  brewing        Json     @db.JsonB
+  crema          Json     @db.JsonB
+  tasting        Json     @db.JsonB
+  nose           Json     @db.JsonB
+  aroma          Json     @db.JsonB
+  personal_score Int?
+  comments       String?
+  is_deleted     Boolean  @default(false) @map("is_deleted")
+  user_id        String?  @map("user_id") @db.Uuid
+
+  @@map("espresso_records")
+  @@schema("public")
 }

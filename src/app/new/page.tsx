@@ -42,7 +42,7 @@ export default function NewRecord() {
       roastLevel: '',
       roastedAt: new Date(),
       roastDate: '',
-      otherInfo: '',
+      other_info: '',
     },
     brewing: {
       dripper: '',
@@ -66,6 +66,15 @@ export default function NewRecord() {
       cleanliness: 0,
       aftertaste: 0,
       totalScore: 0,
+      aromaPowder: 0,
+      aromaPowderNote: '',
+      aromaLiquid: 0,
+      aromaLiquidNote: '',
+      flavor: 0,
+      flavorNote: '',
+      strength: 0,
+      uniformity: 0,
+      cleanness: 0,
     },
     nose: {
       positive: {
@@ -77,14 +86,14 @@ export default function NewRecord() {
         citrus: false,
         flowers: false,
         spices: false,
-        other: '',
+        other: false,
       },
       negative: {
         tobacco: false,
         burnt: false,
         herbs: false,
         woody: false,
-        other: '',
+        other: false,
       },
       notes: '',
     },
@@ -98,18 +107,18 @@ export default function NewRecord() {
         citrus: false,
         flowers: false,
         spices: false,
-        other: '',
+        other: false,
       },
       negative: {
         tobacco: false,
         burnt: false,
         herbs: false,
         woody: false,
-        other: '',
+        other: false,
       },
       notes: '',
     },
-    personalScore: 0,
+    personal_score: 0,
     comments: '',
     notes: '',
   });
@@ -185,88 +194,226 @@ export default function NewRecord() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      if (recordType === 'espresso') {
-        // エスプレッソ用データ整形
-        const espressoData: any = {
-          environment_date: formData.environment.date,
-          environment_time: formData.environment.time,
-          environment_weather: formData.environment.weather,
-          environment_temperature: formData.environment.temperature,
-          environment_humidity: formData.environment.humidity,
-          environment_is_auto_fetched: formData.environment.isAutoFetched,
-          coffee_name: formData.coffee.name,
-          coffee_origin: formData.coffee.origin,
-          coffee_process: formData.coffee.process,
-          coffee_variety: formData.coffee.variety,
-          coffee_roast_level: formData.coffee.roastLevel,
-          coffee_roasted_at: formData.coffee.roastedAt,
-          coffee_roast_date: formData.coffee.roastDate,
-          coffee_other_info: formData.coffee.otherInfo,
-          brewing_type: formData.brewing.dripper || '',
-          brewing_type_other: '',
-          brewing_grinder: formData.brewing.grinder || '',
-          brewing_grind_setting: formData.brewing.grindSetting || '',
-          brewing_coffee_amount: formData.brewing.coffeeAmount ? Number(formData.brewing.coffeeAmount) : null,
-          brewing_yield: null,
-          brewing_brew_time: formData.brewing.brewTime || '',
-          brewing_temperature: formData.brewing.temperature ? Number(formData.brewing.temperature) : null,
-          brewing_pressure: null,
-          brewing_notes: formData.brewing.notes || '',
-          crema_color: cremaScores.color,
-          crema_thickness: cremaScores.thickness,
-          crema_persistence: cremaScores.persistence,
-          crema_notes: '',
-          tasting_acidity: tastingScores.acidity,
-          tasting_sweetness: tastingScores.sweetness,
-          tasting_richness: 0,
-          tasting_body: tastingScores.body,
-          tasting_balance: tastingScores.balance,
-          tasting_cleanliness: 0,
-          tasting_aftertaste: tastingScores.aftertaste,
-          tasting_total_score: totalScore,
-          nose_positive: formData.nose.positive,
-          nose_negative: formData.nose.negative,
-          nose_notes: formData.nose.notes,
-          aroma_positive: formData.aroma.positive,
-          aroma_negative: formData.aroma.negative,
-          aroma_notes: formData.aroma.notes,
-          personal_score: formData.personalScore,
+      if (recordType === 'handdrip') {
+        // 1. 環境情報を保存
+        const { data: envData, error: envError } = await supabase
+          .from('environments')
+          .insert([{
+            date: formData.environment.date,
+            time: formData.environment.time,
+            weather: formData.environment.weather,
+            temperature: formData.environment.temperature,
+            humidity: formData.environment.humidity,
+            is_auto_fetched: formData.environment.isAutoFetched,
+          }])
+          .select('id')
+          .single();
+        if (envError) throw envError;
+
+        // 2. コーヒー情報を保存
+        const { data: coffeeData, error: coffeeError } = await supabase
+          .from('coffees')
+          .insert([{
+            name: formData.coffee.name,
+            origin: formData.coffee.origin,
+            process: formData.coffee.process,
+            variety: formData.coffee.variety,
+            roast_level: formData.coffee.roastLevel,
+            roasted_at: formData.coffee.roastedAt,
+            roast_date: formData.coffee.roastDate,
+            altitude: formData.coffee.altitude,
+            other_info: formData.coffee.other_info,
+          }])
+          .select('id')
+          .single();
+        if (coffeeError) throw coffeeError;
+
+        // 3. ハンドドリップ記録を保存
+        const handdripData = {
+          environment_id: envData.id,
+          coffee_id: coffeeData.id,
+          brewing: {
+            dripper: formData.brewing.dripper,
+            grinder: formData.brewing.grinder,
+            grindSetting: formData.brewing.grindSetting,
+            temperature: formData.brewing.temperature,
+            coffeeAmount: formData.brewing.coffeeAmount,
+            waterAmount: formData.brewing.waterAmount,
+            brewTime: formData.brewing.brewTime,
+            bloomTime: formData.brewing.bloomTime,
+            bloomAmount: formData.brewing.bloomAmount,
+            notes: formData.brewing.notes,
+          },
+          tasting: {
+            acidity: formData.tasting.acidity,
+            sweetness: formData.tasting.sweetness,
+            richness: formData.tasting.richness,
+            body: formData.tasting.body,
+            balance: formData.tasting.balance,
+            cleanliness: formData.tasting.cleanliness,
+            aftertaste: formData.tasting.aftertaste,
+            totalScore: formData.tasting.totalScore,
+            aromaPowder: formData.tasting.aromaPowder,
+            aromaPowderNote: formData.tasting.aromaPowderNote,
+            aromaLiquid: formData.tasting.aromaLiquid,
+            aromaLiquidNote: formData.tasting.aromaLiquidNote,
+            flavor: formData.tasting.flavor,
+            flavorNote: formData.tasting.flavorNote,
+            strength: formData.tasting.strength,
+            uniformity: formData.tasting.uniformity,
+            cleanness: formData.tasting.cleanness,
+          },
+          nose: {
+            positive: { ...formData.nose.positive },
+            negative: { ...formData.nose.negative },
+            notes: formData.nose.notes,
+            positive_other_note: formData.nose.positive_other_note,
+            negative_other_note: formData.nose.negative_other_note,
+          },
+          aroma: {
+            positive: { ...formData.aroma.positive },
+            negative: { ...formData.aroma.negative },
+            notes: formData.aroma.notes,
+            positive_other_note: formData.aroma.positive_other_note,
+            negative_other_note: formData.aroma.negative_other_note,
+          },
+          personal_score: formData.personal_score,
           comments: formData.comments,
           notes: formData.notes,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
         };
-        const { error } = await supabase
-          .from('espresso_records')
-          .insert([espressoData]);
-        if (error) throw error;
+
+        const { error: handdripError } = await supabase
+          .from('handdrip_records')
+          .insert([handdripData]);
+        
+        if (handdripError) {
+          console.error('ハンドドリップ記録の保存エラー:', handdripError);
+          throw new Error(`ハンドドリップ記録の保存に失敗しました: ${handdripError.message}`);
+        }
+
         setShowSuccess(true);
         setTimeout(() => {
-          router.push('/records/espresso');
+          router.push('/records');
         }, 1500);
-        return;
-      }
-      // idを除外してinsertする
-      const { id, ...insertData } = formData;
-      const { data, error } = await supabase
-        .from('tasting_records')
-        .insert([
-          {
-            ...insertData,
-            created_at: new Date().toISOString(),
-          },
-        ])
-        .select()
+      } else if (recordType === 'espresso') {
+        // エスプレッソ記録の保存処理
+        // 1. 環境情報を保存
+        const { data: envData, error: envError } = await supabase
+          .from('environments')
+          .insert([{
+            date: formData.environment.date,
+            time: formData.environment.time,
+            weather: formData.environment.weather,
+            temperature: formData.environment.temperature,
+            humidity: formData.environment.humidity,
+            is_auto_fetched: formData.environment.isAutoFetched,
+          }])
+          .select('id')
         .single();
+        if (envError) throw envError;
 
+        // 2. コーヒー情報を保存
+        const { data: coffeeData, error: coffeeError } = await supabase
+          .from('coffees')
+          .insert([{
+            name: formData.coffee.name,
+            origin: formData.coffee.origin,
+            process: formData.coffee.process,
+            variety: formData.coffee.variety,
+            roast_level: formData.coffee.roastLevel,
+            roasted_at: formData.coffee.roastedAt,
+            roast_date: formData.coffee.roastDate,
+            other_info: formData.coffee.other_info,
+          }])
+          .select('id')
+          .single();
+        if (coffeeError) throw coffeeError;
+
+        // 3. エスプレッソ記録を保存
+        const espressoData: Partial<EspressoRecord> = {
+          environment: {
+            date: formData.environment.date,
+            time: formData.environment.time,
+            weather: formData.environment.weather,
+            temperature: formData.environment.temperature,
+            humidity: formData.environment.humidity,
+            isAutoFetched: formData.environment.isAutoFetched,
+          },
+          coffee: {
+            name: formData.coffee.name,
+            origin: formData.coffee.origin,
+            process: formData.coffee.process,
+            variety: formData.coffee.variety,
+            roastLevel: formData.coffee.roastLevel,
+            roastedAt: formData.coffee.roastedAt,
+            roastDate: formData.coffee.roastDate,
+            other_info: formData.coffee.other_info,
+          },
+          brewing: {
+            type: formData.brewing.dripper,
+            grinder: formData.brewing.grinder,
+            grindSetting: formData.brewing.grindSetting,
+            coffeeAmount: formData.brewing.coffeeAmount,
+            brewTime: formData.brewing.brewTime,
+            temperature: formData.brewing.temperature,
+            notes: formData.brewing.notes,
+            dripper: formData.brewing.dripper,
+          },
+          crema: {
+            color: 0,
+            thickness: 0,
+            persistence: 0,
+          },
+          tasting: {
+            acidity: formData.tasting.acidity,
+            sweetness: formData.tasting.sweetness,
+            richness: formData.tasting.richness,
+            body: formData.tasting.body,
+            balance: formData.tasting.balance,
+            cleanliness: formData.tasting.cleanliness,
+            aftertaste: formData.tasting.aftertaste,
+            totalScore: formData.tasting.totalScore,
+            aromaPowder: formData.tasting.aromaPowder,
+            aromaPowderNote: formData.tasting.aromaPowderNote,
+            aromaLiquid: formData.tasting.aromaLiquid,
+            aromaLiquidNote: formData.tasting.aromaLiquidNote,
+            flavor: formData.tasting.flavor,
+            flavorNote: formData.tasting.flavorNote,
+            strength: formData.tasting.strength,
+            uniformity: formData.tasting.uniformity,
+            cleanness: formData.tasting.cleanness,
+          },
+          nose: {
+            positive: formData.nose.positive,
+            negative: formData.nose.negative,
+            notes: formData.nose.notes,
+          },
+          aroma: {
+            positive: formData.aroma.positive,
+            negative: formData.aroma.negative,
+            notes: formData.aroma.notes,
+          },
+          personal_score: formData.personal_score,
+          comments: formData.comments,
+          notes: formData.notes,
+        };
+
+        const { error } = await supabase
+          .from('espresso_records')
+          .insert([{
+            environment_id: envData.id,
+            coffee_id: coffeeData.id,
+            ...espressoData,
+          }]);
       if (error) throw error;
 
       setShowSuccess(true);
       setTimeout(() => {
-        router.push('/records');
+          router.push('/records/espresso');
       }, 1500);
+      }
     } catch (error) {
-      console.error('Error adding record: ', error);
+      console.error('保存処理でエラーが発生しました:', error);
       alert('記録の保存に失敗しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);
@@ -293,7 +440,17 @@ export default function NewRecord() {
     }));
   };
 
-  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative', key: string, value: boolean | string) => {
+  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative' | 'notes', key: string, value: boolean | string) => {
+    if (field === 'notes') {
+      setFormData(prev => ({
+        ...prev,
+        [type]: {
+          ...prev[type],
+          notes: value,
+        },
+      }));
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       [type]: {
@@ -377,7 +534,7 @@ export default function NewRecord() {
           coffee_roast_level: data.coffee.roastLevel,
           coffee_roasted_at: data.coffee.roastedAt,
           coffee_roast_date: data.coffee.roastDate,
-          coffee_other_info: data.coffee.otherInfo,
+          coffee_other_info: data.coffee.other_info,
           brewing_type: data.brewing.type,
           brewing_type_other: data.brewing.typeOther,
           brewing_grinder: data.brewing.grinder,
@@ -408,7 +565,7 @@ export default function NewRecord() {
           aroma_positive: data.aroma.positive,
           aroma_negative: data.aroma.negative,
           aroma_notes: data.aroma.notes,
-          personal_score: data.personalScore,
+          personal_score: data.personal_score,
           comments: data.comments,
           notes: data.notes,
           created_at: new Date().toISOString(),
@@ -776,6 +933,10 @@ export default function NewRecord() {
             formData={formData}
             onChange={handleAromaChange}
             mode="new"
+            positiveOtherNote={formData.nose.positive_other_note || ''}
+            onPositiveOtherNoteChange={value => setFormData(prev => ({ ...prev, nose: { ...prev.nose, positive_other_note: value } }))}
+            negativeOtherNote={formData.nose.negative_other_note || ''}
+            onNegativeOtherNoteChange={value => setFormData(prev => ({ ...prev, nose: { ...prev.nose, negative_other_note: value } }))}
           />
 
           {/* LES ARÔMES */}
@@ -784,6 +945,10 @@ export default function NewRecord() {
             formData={formData}
             onChange={handleAromaChange}
             mode="new"
+            positiveOtherNote={formData.aroma.positive_other_note || ''}
+            onPositiveOtherNoteChange={value => setFormData(prev => ({ ...prev, aroma: { ...prev.aroma, positive_other_note: value } }))}
+            negativeOtherNote={formData.aroma.negative_other_note || ''}
+            onNegativeOtherNoteChange={value => setFormData(prev => ({ ...prev, aroma: { ...prev.aroma, negative_other_note: value } }))}
           />
 
           {/* 総合評価 */}
@@ -798,11 +963,11 @@ export default function NewRecord() {
                     min="0"
                     max="100"
                     step="1"
-                    value={formData.personalScore}
+                    value={formData.personal_score}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        personalScore: Number(e.target.value),
+                        personal_score: Number(e.target.value),
                       })
                     }
                     className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
@@ -812,16 +977,16 @@ export default function NewRecord() {
                     type="number"
                     min="0"
                     max="100"
-                    value={formData.personalScore}
+                    value={formData.personal_score}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        personalScore: Number(e.target.value),
+                        personal_score: Number(e.target.value),
                       })
                     }
                     className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
                   />
-                  <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personalScore}</span>
+                  <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personal_score}</span>
                 </div>
               </div>
               <div>
@@ -903,14 +1068,31 @@ export default function NewRecord() {
           onSubmit={async (data) => {
             setIsSubmitting(true);
             try {
+              // 環境情報を保存
+              const { data: envData, error: envError } = await supabase
+                .from('environments')
+                .insert([{
+                  date: data.environment.date,
+                  time: data.environment.time,
+                  weather: data.environment.weather,
+                  temperature: data.environment.temperature,
+                  humidity: data.environment.humidity,
+                  is_auto_fetched: data.environment.isAutoFetched,
+                }])
+                .select('id')
+                .single();
+              if (envError) throw envError;
+
+              // shop_visits本体を保存
               const { id, ...insertData } = data;
               const { toSupabaseRow } = await import('@/utils/supabase');
-              const row = toSupabaseRow({ ...insertData });
+              const row = toSupabaseRow({ ...insertData, environment: data.environment });
               const { error } = await supabase
-                .from('shop_visit_records')
+                .from('shop_visits')
                 .insert([
                   {
                     ...row,
+                    environment_id: envData.id,
                     created_at: new Date().toISOString(),
                   },
                 ]);
