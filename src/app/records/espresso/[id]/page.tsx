@@ -10,6 +10,12 @@ import EspressoForm from '@/components/EspressoForm';
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
+// UUIDの検証関数
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 export default function EspressoDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [record, setRecord] = useState<EspressoRecord | null>(null);
@@ -17,6 +23,13 @@ export default function EspressoDetailPage({ params }: { params: { id: string } 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // UUIDの検証
+    if (!isValidUUID(params.id)) {
+      setError('無効なIDです');
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -50,6 +63,46 @@ export default function EspressoDetailPage({ params }: { params: { id: string } 
     fetchRecord();
   }, [params.id]);
 
+  const handleDelete = async () => {
+    if (!window.confirm('本当に削除しますか？')) {
+      return;
+    }
+
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      // エスプレッソ記録を削除
+      await supabase
+        .from('espresso_records')
+        .delete()
+        .eq('id', params.id);
+      
+      // 環境情報を削除
+      if (record?.environment_id) {
+        await supabase
+          .from('environments')
+          .delete()
+          .eq('id', record.environment_id);
+      }
+      
+      // コーヒー情報を削除
+      if (record?.coffee_id) {
+        await supabase
+          .from('coffees')
+          .delete()
+          .eq('id', record.coffee_id);
+      }
+      
+      router.push('/records?tab=espresso');
+    } catch (error) {
+      console.error('削除エラー:', error);
+      alert('削除に失敗しました');
+    }
+  };
+
   if (loading) return <div className="p-8 text-center">読み込み中...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!record) return <div className="p-8 text-center">記録が見つかりません</div>;
@@ -74,6 +127,12 @@ export default function EspressoDetailPage({ params }: { params: { id: string } 
             className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             編集
+          </button>
+          <button
+            onClick={handleDelete}
+            className="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            削除
           </button>
           <button
             onClick={() => router.back()}

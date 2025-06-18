@@ -129,6 +129,8 @@ export type ShopVisitRecord = {
 
 export type EspressoRecord = {
   id: string;
+  environment_id?: string;
+  coffee_id?: string;
   environment: {
     date: string;
     time: string;
@@ -139,11 +141,18 @@ export type EspressoRecord = {
   };
   coffee: {
     name: string;
-    origin?: string;
-    process?: string;
-    variety?: string;
+    origin: string;
+    variety: string;
+    process: string;
+    roast_level: string;
+    roast_date: string;
+    roaster: string;
+    roaster_link: string;
+    price: number;
+    notes: string;
+    altitude?: number | null;
+    processingOther?: string;
     roastLevel?: string;
-    roastedAt?: Date;
     roastDate?: string;
     other_info?: string;
   };
@@ -177,28 +186,24 @@ export type EspressoRecord = {
     cleanliness: number;
     aftertaste: number;
     totalScore: number;
-    aromaPowder?: number;
-    aromaPowderNote?: string;
-    aromaLiquid?: number;
-    aromaLiquidNote?: string;
-    flavor?: number;
-    flavorNote?: string;
-    strength?: number;
-    uniformity?: number;
-    cleanness?: number;
   };
   nose: {
     positive: Record<string, boolean>;
     negative: Record<string, boolean>;
     notes: string;
+    positive_other_note?: string;
+    negative_other_note?: string;
   };
   aroma: {
     positive: Record<string, boolean>;
     negative: Record<string, boolean>;
     notes: string;
+    positive_other_note?: string;
+    negative_other_note?: string;
   };
   personal_score: number;
   comments: string;
   notes?: string;
   created_at?: string;
+  updated_at?: string;
 }; 

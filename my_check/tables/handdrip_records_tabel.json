@@ -1,0 +1,86 @@
+[
+    {
+      "カラム名": "id",
+      "データ型": "uuid",
+      "NULL許可": "NO",
+      "デフォルト値": "gen_random_uuid()"
+    },
+    {
+      "カラム名": "environment_id",
+      "データ型": "uuid",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "coffee_id",
+      "データ型": "uuid",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "environment",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "coffee",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "brewing",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "nose",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "aroma",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "personal_score",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "comments",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "notes",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "created_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    },
+    {
+      "カラム名": "updated_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    }
+  ]

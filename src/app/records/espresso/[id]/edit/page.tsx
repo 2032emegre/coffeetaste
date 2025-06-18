@@ -10,20 +10,10 @@ import { useState, useEffect } from 'react';
 import EspressoForm from '@/components/EspressoForm';
 import { createClient } from '@supabase/supabase-js';
 
-// ダミーデータ（Supabase espresso_recordsに準拠）
-const dummyRecord: EspressoRecord = {
-  id: '1',
-  environment: { date: '2025-05-21', time: '10:00', weather: '晴れ', temperature: 22, humidity: '50%', isAutoFetched: false },
-  coffee: { name: 'CarlosAndres', origin: 'コロンビア', process: 'FullyWashed', variety: 'castillo', roastLevel: '中煎り', roastedAt: new Date(), roastDate: '2025-05-15', otherInfo: '' },
-  brewing: { type: 'espresso', dripper: '', grinder: 'Timemore', grindSetting: '2.5', coffeeAmount: '18', yield: '36', brewTime: '0:30', temperature: '93', pressure: '9', notes: '良い抽出', flair: false, flairMemo: '' },
-  crema: { color: 4, thickness: 4, persistence: 4, notes: 'きれいなクレマ' },
-  tasting: { acidity: 4, sweetness: 4, richness: 4, body: 4, balance: 4, cleanliness: 4, aftertaste: 4, totalScore: 31 },
-  nose: { positive: {}, negative: {}, notes: '' },
-  aroma: { positive: {}, negative: {}, notes: '' },
-  personalScore: 88,
-  comments: 'バランス良し',
-  notes: '',
-  created_at: '2025-05-21T10:00:00Z',
+// UUIDの検証関数
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
 };
 
 export default function EspressoEditPage({ params }: { params: { id: string } }) {
@@ -34,6 +24,13 @@ export default function EspressoEditPage({ params }: { params: { id: string } })
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // UUIDの検証
+    if (!isValidUUID(params.id)) {
+      setError('無効なIDです');
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -59,6 +56,8 @@ export default function EspressoEditPage({ params }: { params: { id: string } })
       ]);
       setRecord({
         ...data,
+        environment_id: data.environment_id,
+        coffee_id: data.coffee_id,
         environment: envRes.data || {},
         coffee: coffeeRes.data || {},
       });
@@ -83,17 +82,16 @@ export default function EspressoEditPage({ params }: { params: { id: string } })
         temperature: data.environment.temperature,
         humidity: data.environment.humidity,
         is_auto_fetched: data.environment.isAutoFetched,
-      }).eq('id', (record as any).environment_id);
+      }).eq('id', record!.environment_id);
       await supabase.from('coffees').update({
         name: data.coffee.name,
         origin: data.coffee.origin,
         process: data.coffee.process,
         variety: data.coffee.variety,
-        roast_level: data.coffee.roastLevel,
-        roasted_at: data.coffee.roastedAt,
-        roast_date: data.coffee.roastDate,
-        other_info: data.coffee.otherInfo,
-      }).eq('id', (record as any).coffee_id);
+        roast_level: data.coffee.roast_level,
+        roast_date: data.coffee.roast_date,
+        other_info: data.coffee.other_info,
+      }).eq('id', record!.coffee_id);
       // espresso_records本体をupdate
       const { error } = await supabase.from('espresso_records').update({
         brewing: data.brewing,
@@ -101,7 +99,7 @@ export default function EspressoEditPage({ params }: { params: { id: string } })
         tasting: data.tasting,
         nose: data.nose,
         aroma: data.aroma,
-        personalScore: data.personalScore,
+        personal_score: data.personal_score,
         comments: data.comments,
         notes: data.notes,
       }).eq('id', params.id);
@@ -110,10 +108,50 @@ export default function EspressoEditPage({ params }: { params: { id: string } })
         setError('保存に失敗しました: ' + error.message);
         return;
       }
-      router.push('/records/espresso');
+      router.push('/records?tab=espresso');
     } catch (e: any) {
       setSaving(false);
       setError('保存に失敗しました: ' + (e.message || ''));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('本当に削除しますか？')) {
+      return;
+    }
+
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      // エスプレッソ記録を削除
+      await supabase
+        .from('espresso_records')
+        .delete()
+        .eq('id', params.id);
+      
+      // 環境情報を削除
+      if (record?.environment_id) {
+        await supabase
+          .from('environments')
+          .delete()
+          .eq('id', record.environment_id);
+      }
+      
+      // コーヒー情報を削除
+      if (record?.coffee_id) {
+        await supabase
+          .from('coffees')
+          .delete()
+          .eq('id', record.coffee_id);
+      }
+      
+      router.push('/records?tab=espresso');
+    } catch (error) {
+      console.error('削除エラー:', error);
+      alert('削除に失敗しました');
     }
   };
 
@@ -149,12 +187,20 @@ export default function EspressoEditPage({ params }: { params: { id: string } })
     <div className="max-w-2xl mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">エスプレッソ記録 編集</h1>
-        <button
-          onClick={() => router.back()}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-        >
-          キャンセル
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleDelete}
+            className="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            削除
+          </button>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            キャンセル
+          </button>
+        </div>
       </div>
       <EspressoForm
         initialData={record}

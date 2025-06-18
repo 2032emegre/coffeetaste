@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
-import { Radar } from 'react-chartjs-2';
 
 // roast_tasting型に合わせる
 export type RoastTasting = {
@@ -14,51 +13,100 @@ export type RoastTasting = {
   notes?: string;
 };
 
+// エスプレッソ・ハンドドリップ用の型
+export type EspressoHanddripTasting = {
+  acidity: number;
+  sweetness: number;
+  richness: number;
+  body: number;
+  balance: number;
+  cleanliness: number;
+  aftertaste: number;
+  totalScore?: number;
+};
+
 type RadarChartProps = {
-  tasting: RoastTasting;
-  mode?: 'roast' | 'espresso' | 'handdrip';
+  tasting: RoastTasting | EspressoHanddripTasting;
+  mode?: 'roast' | 'espresso' | 'handdrip' | 'crema' | 'espresso-taste';
 };
 
 export default function RadarChart({ tasting, mode }: RadarChartProps) {
-  // roast_tastingの主要項目のみ
-  const labels = [
-    '酸味',
-    '甘味',
-    '苦味',
-    'ボディ',
-    '後味',
-    'バランス',
-    '総合',
-  ];
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'テイスティング',
-        data: [
-          tasting.acidity,
-          tasting.sweetness,
-          tasting.bitterness,
-          tasting.body,
-          tasting.aftertaste,
-          tasting.balance,
-          tasting.overall,
-        ],
-        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-        borderColor: 'rgba(99, 102, 241, 1)',
-        borderWidth: 2,
-        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-      },
-    ],
-  };
-  const options = {
-    scale: {
-      ticks: { min: 0, max: 5, stepSize: 1 },
+  let indicator: { name: string; max: number }[] = [];
+  let value: number[] = [];
+
+  if (mode === 'roast' || 'bitterness' in tasting) {
+    // ロースト用
+    indicator = [
+      { name: '酸味', max: 5 },
+      { name: '甘味', max: 5 },
+      { name: '苦味', max: 5 },
+      { name: 'ボディ', max: 5 },
+      { name: '後味', max: 5 },
+      { name: 'バランス', max: 5 },
+      { name: '総合', max: 5 },
+    ];
+    value = [
+      tasting.acidity,
+      tasting.sweetness,
+      (tasting as RoastTasting).bitterness,
+      tasting.body,
+      tasting.aftertaste,
+      tasting.balance,
+      (tasting as RoastTasting).overall,
+    ];
+  } else if (mode === 'crema') {
+    // クレマ用（エスプレッソ）
+    indicator = [
+      { name: '色', max: 5 },
+      { name: '厚み', max: 5 },
+      { name: '持続性', max: 5 },
+    ];
+    value = [
+      tasting.acidity, // color
+      tasting.sweetness, // thickness
+      tasting.richness, // persistence
+    ];
+  } else {
+    // エスプレッソ・ハンドドリップ用
+    indicator = [
+      { name: '酸味', max: 5 },
+      { name: '甘味', max: 5 },
+      { name: '濃厚さ', max: 5 },
+      { name: 'ボディ', max: 5 },
+      { name: 'バランス', max: 5 },
+      { name: 'クリーン度', max: 5 },
+      { name: '余韻', max: 5 },
+    ];
+    value = [
+      tasting.acidity,
+      tasting.sweetness,
+      tasting.richness,
+      tasting.body,
+      tasting.balance,
+      tasting.cleanliness,
+      tasting.aftertaste,
+    ];
+  }
+
+  const option = {
+    radar: {
+      indicator,
+      splitArea: { show: false },
+      axisLine: { lineStyle: { color: '#999', width: 1 } },
+      splitLine: { lineStyle: { color: '#ddd', width: 1 } },
     },
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-    },
+    series: [{
+      type: 'radar',
+      data: [{
+        value,
+        name: '評価',
+        areaStyle: { color: 'rgba(0,0,0,0.1)' },
+        lineStyle: { color: '#000', width: 2 },
+        itemStyle: { color: '#000' },
+      }],
+    }],
+    tooltip: { show: false },
   };
-  return <Radar data={data} options={options} />;
+
+  return <ReactECharts option={option} style={{ height: '100%', width: '100%' }} />;
 } 

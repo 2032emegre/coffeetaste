@@ -38,8 +38,6 @@ const HanddripCard: React.FC<Props> = ({ record, onDelete }) => {
         { name: '甘み', max: 5 },
         { name: 'ボディ', max: 5 },
         { name: 'クリーン度', max: 5 },
-        { name: '強度', max: 5 },
-        { name: '均一性', max: 5 },
       ],
       splitArea: {
         show: false
@@ -68,8 +66,6 @@ const HanddripCard: React.FC<Props> = ({ record, onDelete }) => {
           record.tasting?.sweetness || 0,
           record.tasting?.body || 0,
           record.tasting?.cleanliness || 0,
-          record.tasting?.strength || 0,
-          record.tasting?.uniformity || 0,
         ],
         name: '評価',
         areaStyle: {

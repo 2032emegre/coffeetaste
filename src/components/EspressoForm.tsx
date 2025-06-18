@@ -38,10 +38,13 @@ export default function EspressoForm({
       origin: '',
       process: '',
       variety: '',
-      roastLevel: '',
-      roastedAt: undefined,
-      roastDate: '',
-      otherInfo: '',
+      roast_level: '',
+      roast_date: '',
+      roaster: '',
+      roaster_link: '',
+      price: 0,
+      notes: '',
+      other_info: '',
     },
     brewing: initialData?.brewing || {
       type: '',
@@ -84,11 +87,16 @@ export default function EspressoForm({
       negative: {},
       notes: '',
     },
-    personalScore: initialData?.personalScore || 0,
+    personal_score: initialData?.personal_score || 0,
     comments: initialData?.comments || '',
     notes: initialData?.notes || '',
     created_at: initialData?.created_at || '',
   }));
+
+  const [positiveOtherNoteNose, setPositiveOtherNoteNose] = useState(formData.nose.positive_other_note || '');
+  const [negativeOtherNoteNose, setNegativeOtherNoteNose] = useState(formData.nose.negative_other_note || '');
+  const [positiveOtherNoteAroma, setPositiveOtherNoteAroma] = useState(formData.aroma.positive_other_note || '');
+  const [negativeOtherNoteAroma, setNegativeOtherNoteAroma] = useState(formData.aroma.negative_other_note || '');
 
   const handleEnvironmentChange = (key: keyof EspressoRecord['environment'], value: any) => {
     setFormData(prev => ({
@@ -152,7 +160,17 @@ export default function EspressoForm({
     });
   };
 
-  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative', key: string, value: boolean | string) => {
+  const handleAromaChange = (type: 'nose' | 'aroma', field: 'positive' | 'negative' | 'notes', key: string, value: boolean | string) => {
+    if (field === 'notes') {
+      setFormData(prev => ({
+        ...prev,
+        [type]: {
+          ...prev[type],
+          notes: value as string,
+        },
+      }));
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       [type]: {
@@ -386,12 +404,44 @@ export default function EspressoForm({
         formData={formData}
         onChange={handleAromaChange}
         mode={mode}
+        positiveOtherNote={positiveOtherNoteNose}
+        onPositiveOtherNoteChange={value => {
+          setPositiveOtherNoteNose(value);
+          setFormData(prev => ({
+            ...prev,
+            nose: { ...prev.nose, positive_other_note: value }
+          }));
+        }}
+        negativeOtherNote={negativeOtherNoteNose}
+        onNegativeOtherNoteChange={value => {
+          setNegativeOtherNoteNose(value);
+          setFormData(prev => ({
+            ...prev,
+            nose: { ...prev.nose, negative_other_note: value }
+          }));
+        }}
       />
       <AromaSection
         type="aroma"
         formData={formData}
         onChange={handleAromaChange}
         mode={mode}
+        positiveOtherNote={positiveOtherNoteAroma}
+        onPositiveOtherNoteChange={value => {
+          setPositiveOtherNoteAroma(value);
+          setFormData(prev => ({
+            ...prev,
+            aroma: { ...prev.aroma, positive_other_note: value }
+          }));
+        }}
+        negativeOtherNote={negativeOtherNoteAroma}
+        onNegativeOtherNoteChange={value => {
+          setNegativeOtherNoteAroma(value);
+          setFormData(prev => ({
+            ...prev,
+            aroma: { ...prev.aroma, negative_other_note: value }
+          }));
+        }}
       />
 
       {/* テイスティング評価 */}
@@ -444,11 +494,11 @@ export default function EspressoForm({
                 min="0"
                 max="100"
                 step="1"
-                value={formData.personalScore}
+                value={formData.personal_score}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    personalScore: Number(e.target.value),
+                    personal_score: Number(e.target.value),
                   })
                 }
                 className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
@@ -459,24 +509,24 @@ export default function EspressoForm({
                 type="number"
                 min="0"
                 max="100"
-                value={formData.personalScore}
+                value={formData.personal_score}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    personalScore: Number(e.target.value),
+                    personal_score: Number(e.target.value),
                   })
                 }
                 className="w-20 rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-center"
                 disabled={mode === 'view'}
               />
-              <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personalScore}</span>
+              <span className="text-2xl font-bold text-gray-900 w-16 text-right">{formData.personal_score}</span>
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">評価点数（クレマ＋テイスティング合計）</label>
             <input
               type="number"
-              value={formData.tasting.totalScore + Object.values(formData.crema).reduce((sum, val) => sum + (typeof val === 'number' ? val : 0), 0)}
+              value={formData.tasting.totalScore + (formData.crema.color + formData.crema.thickness + formData.crema.persistence)}
               readOnly
               className="w-full rounded-md border-gray-300 bg-gray-100"
             />

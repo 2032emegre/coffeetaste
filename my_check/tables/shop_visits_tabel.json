@@ -1,0 +1,104 @@
+[
+    {
+      "カラム名": "id",
+      "データ型": "uuid",
+      "NULL許可": "NO",
+      "デフォルト値": "uuid_generate_v4()"
+    },
+    {
+      "カラム名": "environment_id",
+      "データ型": "uuid",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "shop_name",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "shop_link",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "items",
+      "データ型": "jsonb",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_acidity",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_sweetness",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_richness",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_body",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_balance",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_cleanliness",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_aftertaste",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "tasting_total_score",
+      "データ型": "integer",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "comments",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "staff_info",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "created_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    },
+    {
+      "カラム名": "updated_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    }
+  ]

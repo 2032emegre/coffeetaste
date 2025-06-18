@@ -1,0 +1,56 @@
+[
+    {
+      "カラム名": "id",
+      "データ型": "uuid",
+      "NULL許可": "NO",
+      "デフォルト値": "uuid_generate_v4()"
+    },
+    {
+      "カラム名": "date",
+      "データ型": "date",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "time",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "weather",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "temperature",
+      "データ型": "numeric",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "humidity",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "is_auto_fetched",
+      "データ型": "boolean",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "created_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    },
+    {
+      "カラム名": "updated_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    }
+  ]

@@ -1,4 +1,4 @@
-import { TastingRecord } from '@/types/tasting';
+import { TastingRecord, EspressoRecord, ShopVisitRecord } from '@/types/tasting';
 
 const WEATHER_OPTIONS = [
   '晴れ',
@@ -9,9 +9,20 @@ const WEATHER_OPTIONS = [
   '強風',
 ] as const;
 
+type BaseRecord = {
+  environment: {
+    date: string;
+    time: string;
+    weather: string;
+    temperature: number | null;
+    humidity?: string;
+    isAutoFetched: boolean;
+  };
+};
+
 type EnvironmentInfoProps = {
-  formData: TastingRecord | any;
-  onChange: (key: keyof TastingRecord['environment'], value: any) => void;
+  formData: BaseRecord;
+  onChange: (key: keyof BaseRecord['environment'], value: any) => void;
   mode?: 'new' | 'edit' | 'view';
   recordType?: 'handdrip' | 'espresso' | 'roast' | 'shop';
 };

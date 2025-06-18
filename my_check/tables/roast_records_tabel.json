@@ -1,0 +1,248 @@
+[
+  {
+    "カラム名": "id",
+    "データ型": "uuid",
+    "NULL許可": "NO",
+    "デフォルト値": "uuid_generate_v4()"
+  },
+  {
+    "カラム名": "environment_id",
+    "データ型": "uuid",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "coffee_id",
+    "データ型": "uuid",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "charge_weight",
+    "データ型": "numeric",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "charge_temp",
+    "データ型": "numeric",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "target_roast_level",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "charge_time",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "dry_end",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "yellow_start",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "maillard_start",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "first_crack",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "first_crack_peak",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "second_crack",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "drop_time",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "total_time",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "drop_temp",
+    "データ型": "numeric",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "after_weight",
+    "データ型": "numeric",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "color",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_acidity",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_sweetness",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_richness",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_body",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_balance",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_cleanliness",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_aftertaste",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_total_score",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_aroma_powder",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_aroma_powder_note",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_aroma_liquid",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_aroma_liquid_note",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_flavor",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_flavor_note",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_strength",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_uniformity",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "tasting_cleanness",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "overall_total_score",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "personal_score",
+    "データ型": "integer",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "issues",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "summary",
+    "データ型": "text",
+    "NULL許可": "YES",
+    "デフォルト値": null
+  },
+  {
+    "カラム名": "created_at",
+    "データ型": "timestamp with time zone",
+    "NULL許可": "YES",
+    "デフォルト値": "now()"
+  },
+  {
+    "カラム名": "updated_at",
+    "データ型": "timestamp with time zone",
+    "NULL許可": "YES",
+    "デフォルト値": "now()"
+  }
+]

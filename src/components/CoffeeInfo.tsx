@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TastingRecord } from '@/types/tasting';
+import { TastingRecord, EspressoRecord, ShopVisitRecord } from '@/types/tasting';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -55,9 +55,29 @@ const COMMON_VARIETIES = [
   'カツアイ・グリーン',
 ] as const;
 
+type BaseRecord = {
+  coffee: {
+    name: string;
+    origin: string;
+    variety: string;
+    process: string;
+    roast_level: string;
+    roast_date: string;
+    roaster: string;
+    roaster_link: string;
+    price: number;
+    notes: string;
+    altitude?: string;
+    processingOther?: string;
+    roastLevel?: string;
+    roastDate?: string;
+    other_info?: string;
+  };
+};
+
 type CoffeeInfoProps = {
-  formData: TastingRecord;
-  onChange: (key: keyof TastingRecord['coffee'], value: any) => void;
+  formData: BaseRecord;
+  onChange: (key: keyof BaseRecord['coffee'], value: any) => void;
   mode?: 'new' | 'edit' | 'view';
 };
 

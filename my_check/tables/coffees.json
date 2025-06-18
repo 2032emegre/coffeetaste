@@ -1,0 +1,76 @@
+[
+    {
+      "カラム名": "id",
+      "データ型": "uuid",
+      "NULL許可": "NO",
+      "デフォルト値": "uuid_generate_v4()"
+    },
+    {
+      "カラム名": "name",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "origin",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "process",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "variety",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "roast_level",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "roasted_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "roast_date",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "other_info",
+      "データ型": "text",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    },
+    {
+      "カラム名": "created_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    },
+    {
+      "カラム名": "updated_at",
+      "データ型": "timestamp with time zone",
+      "NULL許可": "YES",
+      "デフォルト値": "now()"
+    },
+    {
+      "カラム名": "altitude",
+      "データ型": "numeric",
+      "NULL許可": "YES",
+      "デフォルト値": null
+    }
+  ]
+
+  

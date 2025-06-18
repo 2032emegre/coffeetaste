@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import ShopVisitList from '@/components/ShopVisitList';
 import ShopVisitFilter from '@/components/ShopVisitFilter';
 import ShopVisitForm from '@/components/ShopVisitForm';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import HanddripCard from '@/components/records/HanddripCard';
 import EspressoCard from '@/components/records/EspressoCard';
 import RoastCard from '@/components/records/RoastCard';
@@ -188,6 +188,9 @@ const SORT_OPTIONS = [
 ];
 
 export default function RecordList() {
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as 'handdrip' | 'espresso' | 'shop' | 'roast') || 'handdrip';
+  const [recordType, setRecordType] = useState<'handdrip' | 'espresso' | 'shop' | 'roast'>(initialTab);
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<'personalScore' | 'date' | 'score'>('date');
@@ -196,7 +199,6 @@ export default function RecordList() {
   const [tastingFilters, setTastingFilters] = useState<{ [key in TastingKey]?: number }>({});
   const [originFilter, setOriginFilter] = useState('');
   const [varietyFilter, setVarietyFilter] = useState('');
-  const [recordType, setRecordType] = useState<'handdrip' | 'espresso' | 'shop' | 'roast'>('handdrip');
   const typeTabs = [
     { key: 'handdrip', label: 'ハンドドリップ' },
     { key: 'espresso', label: 'エスプレッソ' },
@@ -352,8 +354,10 @@ export default function RecordList() {
         data = res.data;
         error = res.error;
         if (data && data.length > 0) {
-          const environmentIds = data.map((r: any) => r.environment_id).filter(Boolean);
-          const coffeeIds = data.map((r: any) => r.coffee_id).filter(Boolean);
+          // UUID形式のみ抽出
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          const environmentIds = data.map((r: any) => r.environment_id).filter((id: any) => id && uuidRegex.test(id));
+          const coffeeIds = data.map((r: any) => r.coffee_id).filter((id: any) => id && uuidRegex.test(id));
           const [envRes, coffeeRes] = await Promise.all([
             supabase.from('environments').select('*').in('id', environmentIds),
             supabase.from('coffees').select('*').in('id', coffeeIds),
@@ -723,9 +727,51 @@ export default function RecordList() {
                           record={record}
                           onDetail={(id) => router.push(`/records/espresso/${id}`)}
                           onEdit={(id) => router.push(`/records/espresso/${id}/edit`)}
-                          onDelete={(id) => {
+                          onDelete={async (id) => {
                             if (window.confirm('本当に削除しますか？')) {
-                              setRecords(records.filter(r => r.id !== id));
+                              try {
+                                const supabase = createClient(
+                                  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                                  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                                );
+                                
+                                // エスプレッソ記録を取得してenvironment_idとcoffee_idを取得
+                                const { data: espressoRecord } = await supabase
+                                  .from('espresso_records')
+                                  .select('environment_id, coffee_id')
+                                  .eq('id', id)
+                                  .single();
+                                
+                                if (espressoRecord) {
+                                  // エスプレッソ記録を削除
+                                  await supabase
+                                    .from('espresso_records')
+                                    .delete()
+                                    .eq('id', id);
+                                  
+                                  // 環境情報を削除
+                                  if (espressoRecord.environment_id) {
+                                    await supabase
+                                      .from('environments')
+                                      .delete()
+                                      .eq('id', espressoRecord.environment_id);
+                                  }
+                                  
+                                  // コーヒー情報を削除
+                                  if (espressoRecord.coffee_id) {
+                                    await supabase
+                                      .from('coffees')
+                                      .delete()
+                                      .eq('id', espressoRecord.coffee_id);
+                                  }
+                                }
+                                
+                                // フロントエンドの状態も更新
+                                setRecords(records.filter(r => r.id !== id));
+                              } catch (error) {
+                                console.error('削除エラー:', error);
+                                alert('削除に失敗しました');
+                              }
                             }
                           }}
                         />
